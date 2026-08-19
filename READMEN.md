@@ -58,6 +58,4 @@
 
 `git commit -m "descripción de los cambios"`
 
-`git commit -m "descripción de los cambios"`
-
 `git push`
