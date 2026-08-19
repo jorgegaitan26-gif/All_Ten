@@ -60,4 +60,4 @@
 
 `git push`
 
-## git add "READMEN.md" en caso de el archivo fue modificado después del último commit. para evitar error "M"
+## git add "READMEN.md" en caso de que el archivo fue modificado después del último commit. para evitar error "M"
