@@ -61,3 +61,71 @@
 `git push`
 
 ## git add "READMEN.md" en caso de que el archivo fue modificado después del último commit. para evitar error "M"
+
+## Investigacion: navegacion entre vistas en JavaFX
+
+### Contexto de ALL TEN
+
+ALL TEN sera un juego local desarrollado con JavaFX. Aunque no es una pagina web, puede organizarse de forma parecida: cada vista representa una pantalla y los botones permiten navegar entre ellas.
+
+### Vistas principales
+
+El juego puede comenzar con estas pantallas:
+
+```text
+Menu principal -> Pantalla de juego -> Resultados
+	   ^                                  |
+	   +----------------------------------+
+```
+
+- **Menu principal:** inicia el juego.
+- **Pantalla de juego:** contiene la logica y los controles principales.
+- **Resultados:** muestra el resultado y permite volver al menu.
+
+### Conceptos basicos
+
+- **Stage:** ventana principal de la aplicacion.
+- **Scene:** escena que se muestra dentro de la ventana.
+- **Node:** componente visual, como un boton, una etiqueta o un contenedor.
+- **Navegacion:** cambio de la escena o del contenido que se muestra en la ventana.
+
+### Ejemplo minimo de navegacion
+
+```java
+private Stage ventana;
+
+private void mostrarMenuPrincipal() {
+	Label titulo = new Label("ALL TEN");
+	Button jugar = new Button("Jugar");
+
+	jugar.setOnAction(event -> mostrarPantallaJuego());
+
+	VBox layout = new VBox(15, titulo, jugar);
+	ventana.setScene(new Scene(layout, 600, 400));
+}
+
+private void mostrarPantallaJuego() {
+	Label titulo = new Label("Partida en curso");
+	Button volver = new Button("Volver al menu");
+
+	volver.setOnAction(event -> mostrarMenuPrincipal());
+
+	VBox layout = new VBox(15, titulo, volver);
+	ventana.setScene(new Scene(layout, 600, 400));
+}
+```
+
+En este ejemplo, `setOnAction` detecta el clic del usuario y `setScene` cambia la vista visible. Para un proyecto pequeño, este enfoque es suficiente y facil de mantener.
+
+### Estructura recomendada
+
+```text
+src/
+└── allten/
+	├── AllTenApp.java
+	├── MenuView.java
+	├── JuegoView.java
+	└── ResultadosView.java
+```
+
+Cuando el proyecto crezca, cada vista puede separarse en su propia clase. Asi, la clase principal controla la ventana y cada vista se encarga de sus propios componentes y eventos.
