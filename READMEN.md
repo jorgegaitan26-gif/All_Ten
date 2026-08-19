@@ -51,3 +51,13 @@
 `git merge [rama a mergear]` : Fusiona la rama indicada con la rama actual.
 
 `git branch -d [nombre rama]` : Elimina la rama seleccionada.
+
+## Manejo rapido y subida de Commit
+
+`git add .`
+
+`git commit -m "descripción de los cambios"`
+
+`git commit -m "descripción de los cambios"`
+
+`git push`
