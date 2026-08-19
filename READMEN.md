@@ -128,4 +128,3 @@ src/
 	└── ResultadosView.java
 ```
 
-Cuando el proyecto crezca, cada vista puede separarse en su propia clase. Asi, la clase principal controla la ventana y cada vista se encarga de sus propios componentes y eventos.
