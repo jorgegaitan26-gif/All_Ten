@@ -4,9 +4,9 @@
 
 ` instalar git: winget install --id Git.Git -e `
 
-`git config --global user.name "Jorge gaitan"` : Define tu nombre global para firmar commits en tu máquina.
+`git config --global user.name "Name"` : Define tu nombre global para firmar commits en tu máquina.
 
-`git config --global user.email "jelgaitan@poligran.edu.co"` : Define tu email global para firmar commits en tu máquina.
+`git config --global user.email "Gmail"` : Define tu email global para firmar commits en tu máquina.
 
 ## Configuración de repositorio local
 
