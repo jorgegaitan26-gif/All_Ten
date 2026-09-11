@@ -1,0 +1,63 @@
+classDiagram
+    namespace view {
+        class VistaJuego {
+            -GridPane tableroProgreso
+            -StackPane zonaTrabajo
+            +refrescarZonaTrabajo(String texto) void
+            +marcarCasillaResuelta(int numero) void
+        }
+    }
+
+    namespace controller {
+        class ControlJuego {
+            -Partida partidaActual
+            +procesarToken(String token) void
+            +evaluarJugada() void
+            +registrarVictoria(String alias) void
+        }
+    }
+
+    namespace model {
+        class NickName {
+            -String alias
+            +getAlias() String
+        }
+
+        class Reto {
+            -int[] numerosValores
+            +generarNumeros() int[]
+            +esNumeroDisponible(int valor) boolean
+        }
+
+        class ExpresionMatematica {
+            -List~String~ tokens
+            +agregarToken(String token) void
+            +evaluar() double
+            +esResultadoValido() boolean
+            +cumpleReglasAllTen() boolean
+        }
+
+        class Partida {
+            -int idPartida
+            -boolean[] casillasResueltas
+            -int tiempoTranscurrido
+            +iniciarPartida() void
+            +esJuegoCompletado() boolean
+        }
+    }
+
+    namespace persistencia {
+        class RepositorioPuntuacion {
+            <<interface>>
+            +guardarResultado(NickName jugador, int tiempo) boolean
+            +obtenerRankingTop10() List~Partida~
+        }
+    }
+
+    VistaJuego --> ControlJuego : notifica eventos
+    ControlJuego --> Partida : administra
+    Partida "1" *-- "1" Reto : contiene
+    Partida "1" *-- "1" NickName : pertenece a
+    Partida "1" o-- "1" ExpresionMatematica : evalua con
+    ControlJuego --> RepositorioPuntuacion : guarda record en
+    
