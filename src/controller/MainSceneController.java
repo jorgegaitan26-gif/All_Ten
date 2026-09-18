@@ -17,4 +17,14 @@ public class MainSceneController {
         ventanaInstrucciones.setScene(new Scene(root, 800, 450));
         ventanaInstrucciones.show();
     }
+
+    @FXML
+    private void abrirJuego() throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/view/GameView.fxml"));
+
+        Stage ventanaJuego = new Stage();
+        ventanaJuego.setTitle("All Ten - Tablero de Juego");
+        ventanaJuego.setScene(new Scene(root, 520, 860));
+        ventanaJuego.show();
+    }
 }

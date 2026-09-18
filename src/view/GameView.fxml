@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx" 
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controller.GameController"
+      alignment="TOP_CENTER" 
+      spacing="18" 
+      style="-fx-background-color: #F1EFE8;">
+
+    <padding>
+        <Insets top="28" right="28" bottom="28" left="28"/>
+    </padding>
+
+    <Label text="Zona de trabajo" style="-fx-text-fill: #888780; -fx-font-size: 13px;"/>
+
+    <StackPane fx:id="workzoneBox" minHeight="60" 
+               style="-fx-background-color: #FFFFFF; -fx-background-radius: 14; -fx-border-color: #A9A79E; -fx-border-radius: 14; -fx-border-width: 1.5;">
+        <Label fx:id="workzoneLabel" text="Toca números, operadores o paréntesis" 
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #888780;"/>
+    </StackPane>
+
+</VBox>

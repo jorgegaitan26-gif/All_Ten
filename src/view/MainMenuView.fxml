@@ -33,6 +33,7 @@
 
     <Button fx:id="btnJugar"
             text="Jugar"
+            onAction="#abrirJuego"
             style="-fx-background-color: #7EB6E8;
                    -fx-text-fill: #2D1B69;
                    -fx-font-size: 30px;
