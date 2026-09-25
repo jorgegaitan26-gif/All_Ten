@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="co.edu.poli.Allten.Controlador.JuegoController"
+           styleClass="juego-root"
+           stylesheets="@juego.css">
+
+    <!-- ===================== PANTALLA DE JUEGO ===================== -->
+    <BorderPane styleClass="juego-fondo">
+
+        <padding>
+            <Insets top="25" right="35" bottom="25" left="35"/>
+        </padding>
+
+        <!-- ENCABEZADO -->
+        <top>
+            <VBox spacing="12">
+
+                <HBox alignment="CENTER_LEFT" spacing="20">
+
+                    <Label text="All Ten" styleClass="titulo-juego"/>
+
+                    <Label maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+
+                    <Label fx:id="lblTiempo" text="00:00" styleClass="etiqueta-tiempo"/>
+
+                    <Button fx:id="btnReiniciar" text="Reiniciar" styleClass="btn-secundario" onAction="#reiniciarPartida"/>
+                    <Button fx:id="btnMenu" text="Menu" styleClass="btn-secundario" onAction="#volverAlMenu"/>
+
+                </HBox>
+
+                <Label text="Objetivos (1 al 10)" styleClass="subtitulo"/>
+
+                <HBox fx:id="filaObjetivos" spacing="10" alignment="CENTER_LEFT"/>
+
+            </VBox>
+        </top>
+
+        <!-- CENTRO: zona de trabajo + tableros -->
+        <center>
+            <VBox spacing="22" alignment="TOP_CENTER" styleClass="cuerpo-juego">
+
+                <padding>
+                    <Insets top="25" right="10" bottom="10" left="10"/>
+                </padding>
+
+                <StackPane fx:id="zonaTrabajo" styleClass="zona-trabajo" minHeight="70" maxWidth="620">
+                    <Label fx:id="lblExpresion" text="Toca un número para empezar" styleClass="texto-zona-trabajo" wrapText="true"/>
+                </StackPane>
+
+                <Label fx:id="lblMensaje" styleClass="texto-mensaje"/>
+
+                <VBox spacing="10" alignment="CENTER">
+                    <Label text="números" styleClass="subtitulo"/>
+                    <HBox fx:id="filaNumeros" spacing="14" alignment="CENTER"/>
+                </VBox>
+
+                <VBox spacing="10" alignment="CENTER">
+                    <Label text="operadores" styleClass="subtitulo"/>
+                    <HBox fx:id="filaOperadores" spacing="14" alignment="CENTER"/>
+                </VBox>
+
+                <HBox spacing="14" alignment="CENTER">
+                    <Button fx:id="btnBorrar" text="&#9003; Borrar" styleClass="btn-accion" onAction="#borrarUltimo"/>
+                    <Button fx:id="btnLimpiar" text="Limpiar intento" styleClass="btn-accion" onAction="#limpiarIntento"/>
+                    <Button fx:id="btnComprobar" text="Comprobar" styleClass="btn-comprobar" onAction="#comprobarIntento"/>
+                </HBox>
+
+            </VBox>
+        </center>
+
+    </BorderPane>
+
+    <!-- ===================== PANEL DE VICTORIA (superpuesto) ===================== -->
+    <StackPane fx:id="panelVictoria" styleClass="overlay-victoria" visible="false" managed="false">
+
+        <VBox styleClass="tarjeta-victoria" spacing="16" alignment="CENTER" maxWidth="480" maxHeight="520">
+
+            <Label text="Completaste el reto!" styleClass="titulo-victoria"/>
+
+            <Label fx:id="lblTiempoFinal" styleClass="texto-tiempo-final"/>
+
+            <HBox spacing="14" alignment="CENTER">
+                <Button fx:id="btnJugarOtraVez" text="Jugar otra vez" styleClass="btn-comprobar" onAction="#jugarOtraVez"/>
+                <Button fx:id="btnCerrarVictoria" text="Menu" styleClass="btn-secundario" onAction="#volverAlMenu"/>
+            </HBox>
+
+        </VBox>
+
+    </StackPane>
+
+</StackPane>

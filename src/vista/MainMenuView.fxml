@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controller.MainSceneController"
+      fx:controller="co.edu.poli.Allten.Controlador.MainSceneController"
       alignment="CENTER"
       spacing="25"
       style="-fx-background-color: #f1efe8;">
@@ -33,6 +33,7 @@
 
     <Button fx:id="btnJugar"
             text="Jugar"
+            onAction="#jugar"
             style="-fx-background-color: #7EB6E8;
                    -fx-text-fill: #2D1B69;
                    -fx-font-size: 30px;

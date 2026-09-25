@@ -14,7 +14,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controller.InstruccionesController"
+            fx:controller="co.edu.poli.Allten.Controlador.InstruccionesController"
             styleClass="instrucciones-root"
             stylesheets="@instrucciones.css">
 

@@ -1,4 +1,4 @@
-package controller;
+package co.edu.poli.Allten.Controlador;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,7 +11,19 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
+/**
+ * Controlador de la pantalla "Como jugar" (InstruccionesView.fxml).
+ *
+ * Muestra, en un panel lateral con categorias (Objetivo, Operadores,
+ * Tiempo, Numeros, Como comprobar), el texto y la imagen correspondientes
+ * a cada categoria. Es una pantalla puramente informativa: no depende del
+ * Modelo ni de los Servicios del juego.
+ */
 public class InstruccionesController {
+
+    /** Constructor por defecto; JavaFX lo invoca al cargar el FXML de esta pantalla. */
+    public InstruccionesController() {
+    }
 
     @FXML
     private VBox menuLateral;
@@ -51,6 +63,7 @@ public class InstruccionesController {
     // INICIO
     // =====================================
 
+    /** Se ejecuta al cargar el FXML: muestra la categoria "Objetivo" por defecto. */
     @FXML
     public void initialize() {
         mostrarObjetivo();
@@ -61,6 +74,7 @@ public class InstruccionesController {
     // OBJETIVO
     // =====================================
 
+    /** Muestra la explicacion del objetivo del juego. */
     @FXML
     private void mostrarObjetivo() {
 
@@ -69,7 +83,7 @@ public class InstruccionesController {
                 + "dígitos iniciales que cambian según el reto.",
                 null,
                 btnObjetivo,
-                "objetivo.png.png"
+                "objetivo.png"
         );
     }
 
@@ -78,6 +92,7 @@ public class InstruccionesController {
     // OPERADORES
     // =====================================
 
+    /** Muestra que operadores estan permitidos y como usar parentesis. */
     @FXML
     private void mostrarOperadores() {
 
@@ -96,6 +111,7 @@ public class InstruccionesController {
     // TIEMPO
     // =====================================
 
+    /** Muestra la explicacion sobre el cronometro/tiempo del reto. */
     @FXML
     private void mostrarTiempo() {
 
@@ -112,6 +128,7 @@ public class InstruccionesController {
     // NÚMEROS
     // =====================================
 
+    /** Muestra la explicacion sobre el uso de los 4 numeros disponibles. */
     @FXML
     private void mostrarNumeros() {
 
@@ -128,6 +145,7 @@ public class InstruccionesController {
     // COMPROBAR
     // =====================================
 
+    /** Muestra la explicacion sobre como y cuando se comprueba el resultado. */
     @FXML
     private void mostrarComprobar() {
 
@@ -145,6 +163,16 @@ public class InstruccionesController {
     // ACTUALIZAR CONTENIDO
     // =====================================
 
+    /**
+     * Actualiza el panel de contenido con el texto, la imagen y (si aplica)
+     * la lista de ejemplos de la categoria seleccionada, y resalta el boton
+     * de esa categoria en el menu lateral.
+     *
+     * @param cuerpo       texto explicativo a mostrar
+     * @param ejemplos     lineas de ejemplo a listar, o {@code null} si la categoria no tiene
+     * @param activo       boton del menu lateral que debe quedar marcado como activo
+     * @param nombreImagen nombre del archivo de imagen dentro de /vista/images
+     */
     private void actualizarContenido(
             String cuerpo,
             List<String> ejemplos,
@@ -164,7 +192,7 @@ public class InstruccionesController {
             Image imagen = new Image(
                     getClass()
                             .getResource(
-                                    "/view/images/" + nombreImagen
+                                    "/vista/images/" + nombreImagen
                             )
                             .toExternalForm()
             );
@@ -229,6 +257,7 @@ public class InstruccionesController {
     // VOLVER
     // =====================================
 
+    /** Cierra la ventana de instrucciones y regresa al menu principal. */
     @FXML
     private void volver() {
 
