@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"co.edu.poli.Allten.App"},{"l":"co.edu.poli.Allten.Controlador"},{"l":"co.edu.poli.Allten.DAO"},{"l":"co.edu.poli.Allten.Modelo"}];updateSearchResults();
