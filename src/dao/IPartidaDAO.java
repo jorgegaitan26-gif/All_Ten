@@ -1,12 +1,11 @@
 package dao;
 
-import java.util.List;
+import model.Jugador;
 import model.Partida;
+import java.util.List;
 
 public interface IPartidaDAO {
-
-    boolean guardarPartida(Partida partida, int idJugador);
-
-    List<Partida> obtenerTopPuntuaciones();
-
+    void registrarJugador(Jugador jugador);
+    void registrarPartida(Partida partida);
+    List<Partida> obtenerHistorialPartidas();
 }
