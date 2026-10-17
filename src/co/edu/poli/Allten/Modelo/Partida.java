@@ -96,6 +96,9 @@ public class Partida {
     /** Jugador dueno de la partida (Partida.Jugador_id_Jugador; relacion jugador 1 - 0..* partida). */
     private Jugador jugador;
 
+    /** Identificador de la partida en la base de datos (id_Partida); {@code null} mientras no se ha guardado. */
+    private Integer idPartida;
+
     // ----- Composicion (partida 1 - 1 cronometro / partida 1 - 0..* expresion) -----
     private final Cronometro cronometro;
     private final List<Expresion> historialExpresiones;
@@ -123,6 +126,27 @@ public class Partida {
         this.cronometro = new Cronometro();
         this.historialExpresiones = new ArrayList<>();
         this.aleatorio = new Random();
+    }
+
+    /**
+     * Reconstruye una partida ya terminada a partir de un registro de la
+     * base de datos (lo usa {@code PartidaDAOImpl.obtenerHistorialPartidas()}).
+     *
+     * @param idPartida             id_Partida del registro
+     * @param jugador               jugador dueno de la partida
+     * @param tiempoTotal           tiempo total en segundos
+     * @param operacionesRealizadas texto "objetivo = expresion" de cada objetivo logrado
+     * @param fechaFinalizacion     fecha en que se termino la partida
+     */
+    public Partida(Integer idPartida, Jugador jugador, double tiempoTotal,
+                   List<String> operacionesRealizadas, LocalDateTime fechaFinalizacion) {
+        this(jugador);
+        this.idPartida = idPartida;
+        this.tiempoTotal = tiempoTotal;
+        this.fechaFinalizacion = fechaFinalizacion;
+        if (operacionesRealizadas != null) {
+            this.operacionesRealizadas = new ArrayList<>(operacionesRealizadas);
+        }
     }
 
     // =====================================================================
@@ -636,6 +660,21 @@ public class Partida {
      * @return el nivel de dificultad de la partida */
     public NivelDificultad getNivelDificultad() {
         return nivelDificultad;
+    }
+
+    /** Da acceso al identificador de la partida en la base de datos.
+     * @return el id_Partida, o {@code null} si todavia no se ha guardado */
+    public Integer getIdPartida() {
+        return idPartida;
+    }
+
+    /**
+     * Asigna el identificador generado por la base de datos al guardar la partida.
+     *
+     * @param idPartida id_Partida generado
+     */
+    public void setIdPartida(Integer idPartida) {
+        this.idPartida = idPartida;
     }
 
     /** Da acceso al jugador de la partida.

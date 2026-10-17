@@ -1,24 +1,13 @@
 package co.edu.poli.Allten.DAO;
 
+import co.edu.poli.Allten.Modelo.Jugador;
+import co.edu.poli.Allten.Modelo.Partida;
+import java.sql.SQLException;
 import java.util.List;
 
-import co.edu.poli.Allten.Modelo.Partida;
-
-/**
- * Contrato de persistencia para las partidas jugadas (patron DAO).
- */
 public interface IPartidaDAO {
-
-    /**
-     * Guarda una partida jugada por el jugador indicado.
-     *
-     * @param partida   partida a guardar
-     * @param idJugador identificador del jugador dueno de la partida
-     * @return true si se guardo correctamente
-     */
-    boolean guardarPartida(Partida partida, int idJugador);
-
-    /** Consulta las mejores partidas guardadas.
-     * @return las partidas ordenadas de menor a mayor tiempo total */
-    List<Partida> obtenerTopPuntuaciones();
+    void registrarJugador(Jugador jugador) throws SQLException;
+    void registrarPartida(Partida partida) throws SQLException;
+    void registrarPartida(Jugador jugador, Partida partida) throws SQLException;
+    List<Partida> obtenerHistorialPartidas() throws SQLException;
 }
