@@ -350,22 +350,19 @@ public class Partida {
     // =====================================================================
 
     /**
-     * Calcula, con los 4 numeros de la partida y los operadores permitidos
-     * por la dificultad, una expresion para cada objetivo del 1 al 10.
+     * Calcula una expresion con los 4 numeros de la partida y los operadores
+     * permitidos por la dificultad para cada objetivo del 1 al 10.
      *
-     * @return una lista "objetivo = expresion" ordenada del 1 al 10 (solo los objetivos que tienen solucion)
+     * @return una lista de soluciones "objetivo = expresion", ordenada por objetivo
      */
     public List<String> posiblesSoluciones() {
-        // [PS1] Inicio: solicitar posibles soluciones
-        // [PS2] Recuperar numerosDisponibles y nivelDificultad
         Map<Integer, String> soluciones = calcularSoluciones(numerosDisponibles, nivelDificultad);
 
-        // [PS7] Retornar List<String> con soluciones al controlador
         List<String> lista = new ArrayList<>();
         for (Map.Entry<Integer, String> solucion : soluciones.entrySet()) {
             lista.add(solucion.getKey() + " = " + solucion.getValue());
         }
-        return lista;                                       // [PS8] Fin
+        return lista;
     }
 
     /**
@@ -394,26 +391,22 @@ public class Partida {
                 }
             }
 
-            // [PS3] Evaluar combinaciones matematicas para objetivos 1 al 10
             if (buscarCombinaciones(hojas, numeros, nivel, soluciones)) {
-                break;                                      // [PS6] Si: se cubrieron los 10
+                break;
             }
         }
         return soluciones;
     }
 
     /**
-     * Combina recursivamente pares de nodos con cada operador permitido
-     * (esto cubre todas las formas de agrupar con parentesis).
-     *
-     * @return true cuando ya se cubrieron los 10 objetivos
+     * Combina recursivamente pares de nodos con cada operador permitido,
+     * cubriendo todas las formas de agrupar con parentesis.
      */
     private boolean buscarCombinaciones(List<Nodo> nodos, List<Integer> numeros,
                                         NivelDificultad nivel, Map<Integer, String> soluciones) {
 
         if (nodos.size() == 1) {
             registrarSiEsObjetivo(nodos.get(0), numeros, nivel, soluciones);
-            // [PS6] ¿Se cubrieron los objetivos 1 al 10?
             return soluciones.size() == OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1;
         }
 
@@ -499,7 +492,7 @@ public class Partida {
     /**
      * [PS4] Si el valor es un objetivo pendiente, comprueba con una
      * {@link Expresion} real que la expresion es valida segun la
-     * dificultad y, si lo es, [PS5] la agrega a la lista de soluciones.
+     * dificultad y, si lo es, la agrega si todavía no hay una para ese objetivo.
      */
     private void registrarSiEsObjetivo(Nodo nodo, List<Integer> numeros,
                                        NivelDificultad nivel, Map<Integer, String> soluciones) {

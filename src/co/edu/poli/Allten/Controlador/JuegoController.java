@@ -14,8 +14,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import co.edu.poli.Allten.DAO.IPartidaDAO;
@@ -42,12 +45,17 @@ public class JuegoController {
     @FXML private Label lblTiempo;
     @FXML private Label lblTiempoFinal;
     @FXML private StackPane panelVictoria;
+    @FXML private VBox panelAyuda;
+    @FXML private FlowPane listaAyuda;
+    @FXML private Label lblNumerosAyuda;
+    @FXML private Button btnAyuda;
 
     private Jugador jugador;
     private Partida partida;
     private Expresion intentoActual;
     private IPartidaDAO partidaDAO;
     private boolean partidaGuardada;
+    private boolean ayudaCargada;
 
     private final Map<Integer, Label> etiquetasObjetivo = new HashMap<>();
     private final List<Button> botonesNumero = new ArrayList<>();
@@ -447,6 +455,55 @@ public class JuegoController {
      */
     private void mostrarMensaje(String mensaje) {
         lblMensaje.setText(mensaje);
+    }
+
+    @FXML
+    private void mostrarAyuda() {
+        boolean mostrar = !panelAyuda.isVisible();
+        if (mostrar && !ayudaCargada) {
+            cargarSolucionesAyuda();
+            ayudaCargada = true;
+        }
+
+        panelAyuda.setVisible(mostrar);
+        panelAyuda.setManaged(mostrar);
+        btnAyuda.setText(mostrar ? "×" : "?");
+        btnAyuda.setAccessibleText(mostrar ? "Cerrar ayuda" : "Mostrar ayuda");
+    }
+
+    private void cargarSolucionesAyuda() {
+        lblNumerosAyuda.setText("Números: " + partida.getNumerosDisponibles());
+        List<String> soluciones = partida.posiblesSoluciones();
+        if (soluciones.isEmpty()) {
+            Label sinSoluciones = new Label("No se encontraron soluciones para este reto.");
+            sinSoluciones.getStyleClass().add("sin-soluciones-ayuda");
+            listaAyuda.getChildren().add(sinSoluciones);
+            return;
+        }
+
+        for (String solucion : soluciones) {
+            listaAyuda.getChildren().add(crearTarjetaAyuda(solucion));
+        }
+    }
+
+    private HBox crearTarjetaAyuda(String solucion) {
+        int separador = solucion.indexOf(" = ");
+        if (separador < 0) {
+            throw new IllegalArgumentException("Formato de solución inesperado: " + solucion);
+        }
+
+        Label objetivo = new Label(solucion.substring(0, separador));
+        objetivo.getStyleClass().add("objetivo-tarjeta-ayuda");
+        Label expresion = new Label(solucion.substring(separador + 3));
+        expresion.setWrapText(true);
+        HBox.setHgrow(expresion, Priority.ALWAYS);
+        expresion.getStyleClass().add("expresion-tarjeta-ayuda");
+
+        HBox tarjeta = new HBox(12, objetivo, expresion);
+        tarjeta.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        tarjeta.setPrefWidth(260);
+        tarjeta.getStyleClass().add("tarjeta-ayuda");
+        return tarjeta;
     }
 
     private void guardarPartidaFinalizada() {

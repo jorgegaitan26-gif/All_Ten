@@ -46,6 +46,100 @@
     -fx-cursor: hand;
 }
 
+.boton-ayuda {
+    -fx-background-color: #EF9F27;
+    -fx-text-fill: #412402;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 100;
+    -fx-min-width: 54px;
+    -fx-min-height: 54px;
+    -fx-max-width: 54px;
+    -fx-max-height: 54px;
+    -fx-alignment: CENTER;
+    -fx-cursor: hand;
+}
+
+.boton-ayuda:hover {
+    -fx-background-color: #F5A623;
+}
+
+.panel-ayuda {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 20;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.22), 18, 0.18, 0, 5);
+}
+
+.titulo-ayuda {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.numeros-ayuda {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12;
+    -fx-padding: 8 14;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5B8F2A;
+}
+
+.lista-ayuda {
+    -fx-padding: 4;
+}
+
+.scroll-ayuda {
+    -fx-background-color: transparent;
+    -fx-min-height: 230;
+    -fx-max-height: 390;
+}
+
+.scroll-ayuda > .viewport {
+    -fx-background-color: transparent;
+}
+
+.tarjeta-ayuda {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.objetivo-tarjeta-ayuda {
+    -fx-background-color: #97C459;
+    -fx-background-radius: 100;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+    -fx-alignment: CENTER;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.expresion-tarjeta-ayuda {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3D374A;
+}
+
+.sin-soluciones-ayuda {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-padding: 18;
+    -fx-font-size: 14px;
+    -fx-text-fill: #3D374A;
+}
+
 /* ---------- Objetivos 1..10 ---------- */
 
 .objetivo-pendiente {
