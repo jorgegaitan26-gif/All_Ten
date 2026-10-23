@@ -1,32 +1,25 @@
 package co.edu.poli.Allten.DAO;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
-import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
 
 /**
- * Contrato de persistencia para las partidas jugadas (patron DAO).
+ * Contrato de persistencia para las partidas jugadas.
  */
-public interface IPartidaDAO extends Jugador.RegistroJugadores<SQLException> {
+public interface IPartidaDAO extends CRUD<Partida> {
 
-    @Override
-    Jugador buscarPorNickname(String nickname) throws SQLException;
+    /** Consulta las partidas de un jugador, de la más reciente a la más antigua. */
+    List<Partida> readByJugador(int idJugador) throws SQLException;
 
-    @Override
-    Integer registrarJugador(String nickname) throws SQLException;
+    /** Consulta la mejor partida de cada jugador, ordenada por menor tiempo. */
+    List<Partida> readTop(int limite) throws SQLException;
 
-    /**
-     * Guarda una partida jugada por el jugador indicado.
-     *
-     * @param partida   partida a guardar
-     * @param idJugador identificador del jugador dueno de la partida
-     * @throws SQLException si la base de datos no pudo guardar la partida
-     */
-    void guardarPartida(Partida partida, int idJugador) throws SQLException;
+    /** Consulta la mejor partida de cada jugador para un reto diario. */
+    List<Partida> readTopForDate(LocalDate fechaReto, int limite) throws SQLException;
 
-    /** Consulta el historial completo en formato legible para la interfaz.
-     * @return registros ordenados del mas reciente al mas antiguo */
-    List<String> obtenerHistorialPartidas() throws SQLException;
+    /** Elimina todas las partidas de un jugador. */
+    int deleteByJugador(int idJugador) throws SQLException;
 }

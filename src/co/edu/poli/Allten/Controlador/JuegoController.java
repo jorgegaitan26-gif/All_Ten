@@ -37,6 +37,7 @@ public class JuegoController {
     @FXML private HBox filaOperadores;
     @FXML private StackPane zonaTrabajo;
     @FXML private Label lblExpresion;
+    @FXML private Label lblResultadoParcial;
     @FXML private Label lblMensaje;
     @FXML private Label lblTiempo;
     @FXML private Label lblTiempoFinal;
@@ -221,6 +222,7 @@ public class JuegoController {
      */
     private void onOperador(String operador) {
 
+        intentoActual.continuarOperacion();
         boolean agregado = intentoActual.agregarOperacion(operador);
 
         if (!agregado) {
@@ -382,10 +384,41 @@ public class JuegoController {
 
         String texto = intentoActual.getTextoFormateado();
         lblExpresion.setText(texto.isEmpty() ? "Toca un número para empezar" : texto);
+        refrescarResultadoParcial();
 
         for (int i = 0; i < botonesNumero.size(); i++) {
-            botonesNumero.get(i).setDisable(intentoActual.isNumeroUsado(i));
+            boolean usado = intentoActual.isNumeroUsado(i);
+            botonesNumero.get(i).setDisable(usado);
+            botonesNumero.get(i).pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("usado"), usado);
         }
+    }
+
+    private void refrescarResultadoParcial() {
+        if (!intentoActual.validarExpresionFinalizada()
+                || !intentoActual.validarReglasOperaciones()
+                || !intentoActual.validarNumerosPermitidos()
+                || !intentoActual.validarDivisionCero()) {
+            lblResultadoParcial.setText("");
+            return;
+        }
+
+        double resultado = intentoActual.calcularResultado();
+        if (Double.isNaN(resultado) || Double.isInfinite(resultado)) {
+            lblResultadoParcial.setText("");
+            return;
+        }
+
+        lblResultadoParcial.setText("Resultado parcial: " + formatearResultado(resultado));
+    }
+
+    private String formatearResultado(double resultado) {
+        double entero = Math.rint(resultado);
+        if (Math.abs(resultado - entero) < 1e-9) {
+            return String.valueOf((long) entero);
+        }
+        return String.format(java.util.Locale.ROOT, "%.4f", resultado)
+                .replaceAll("0+$", "")
+                .replaceAll("\\.$", "");
     }
 
     /** Colorea en verde la etiqueta del ultimo objetivo agregado a {@code Partida.getObjetivosCompletados()}. */
@@ -425,7 +458,7 @@ public class JuegoController {
             return;
         }
         try {
-            partidaDAO.guardarPartida(partida, jugador.getIdJugador());
+            partidaDAO.create(partida);
             partidaGuardada = true;
         } catch (SQLException e) {
             mostrarErrorPersistencia("No se pudo guardar la partida: " + e.getMessage());

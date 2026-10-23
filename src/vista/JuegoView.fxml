@@ -23,7 +23,7 @@
 
         <!-- ENCABEZADO -->
         <top>
-            <VBox spacing="12">
+            <VBox spacing="18">
 
                 <HBox alignment="CENTER_LEFT" spacing="20">
 
@@ -38,9 +38,10 @@
 
                 </HBox>
 
-                <Label text="Objetivos (1 al 10)" styleClass="subtitulo"/>
-
-                <HBox fx:id="filaObjetivos" spacing="10" alignment="CENTER_LEFT"/>
+                <VBox alignment="CENTER" spacing="12" styleClass="panel-objetivos">
+                    <Label text="Completa los objetivos" styleClass="titulo-objetivos"/>
+                    <HBox fx:id="filaObjetivos" spacing="14" alignment="CENTER"/>
+                </VBox>
 
             </VBox>
         </top>
@@ -53,15 +54,20 @@
                     <Insets top="25" right="10" bottom="10" left="10"/>
                 </padding>
 
-                <StackPane fx:id="zonaTrabajo" styleClass="zona-trabajo" minHeight="70" maxWidth="620">
-                    <Label fx:id="lblExpresion" text="Toca un número para empezar" styleClass="texto-zona-trabajo" wrapText="true"/>
+                <StackPane fx:id="zonaTrabajo" styleClass="zona-trabajo" minHeight="100" maxWidth="620">
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label fx:id="lblExpresion" text="Toca un número para empezar"
+                               styleClass="texto-zona-trabajo" wrapText="true"/>
+                        <Label fx:id="lblResultadoParcial" styleClass="texto-resultado-parcial"/>
+                    </VBox>
                 </StackPane>
 
                 <Label fx:id="lblMensaje" styleClass="texto-mensaje"/>
 
                 <VBox spacing="10" alignment="CENTER">
-                    <Label text="números" styleClass="subtitulo"/>
+                    <Label text="Números del reto" styleClass="subtitulo"/>
                     <HBox fx:id="filaNumeros" spacing="14" alignment="CENTER"/>
+                    <Label text="Azul: disponible  ·  Gris: ya utilizado" styleClass="ayuda-numeros"/>
                 </VBox>
 
                 <VBox spacing="10" alignment="CENTER">

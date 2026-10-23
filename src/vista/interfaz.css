@@ -1,0 +1,116 @@
+.ranking-root {
+    -fx-background-color: #f1efe8;
+}
+
+.ranking-header {
+    -fx-padding: 0 0 22 0;
+}
+
+.ranking-title,
+.nickname-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d1b69;
+}
+
+.ranking-subtitle,
+.nickname-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #77746d;
+}
+
+.ranking-close {
+    -fx-background-color: #f5a623;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 9 20;
+    -fx-cursor: hand;
+}
+
+.ranking-content {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-padding: 18;
+}
+
+.ranking-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #e5e1d7;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-table-cell-border-color: #eeeae2;
+}
+
+.ranking-table .column-header-background {
+    -fx-background-color: #2d1b69;
+    -fx-background-radius: 9 9 0 0;
+}
+
+.ranking-table .column-header,
+.ranking-table .filler {
+    -fx-background-color: transparent;
+    -fx-size: 42px;
+}
+
+.ranking-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.ranking-table .table-cell {
+    -fx-padding: 12 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: #302b3d;
+}
+
+.ranking-table .table-row-cell:odd {
+    -fx-background-color: #faf9f6;
+}
+
+.ranking-table .table-row-cell:selected {
+    -fx-background-color: #e7eff9;
+}
+
+.ranking-empty,
+.ranking-footnote {
+    -fx-font-size: 13px;
+    -fx-text-fill: #77746d;
+}
+
+.ranking-footnote {
+    -fx-padding: 3 2 0 2;
+}
+
+.nickname-dialog {
+    -fx-background-color: #f1efe8;
+    -fx-background-radius: 18;
+    -fx-padding: 12;
+    -fx-pref-width: 450;
+}
+
+.nickname-content {
+    -fx-padding: 18 18 12 18;
+}
+
+.nickname-field {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #d8d3c8;
+    -fx-border-radius: 10;
+    -fx-padding: 11;
+    -fx-font-size: 15px;
+}
+
+.nickname-dialog .button {
+    -fx-background-radius: 10;
+    -fx-padding: 9 18;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.nickname-dialog .button:default {
+    -fx-background-color: #97c459;
+    -fx-text-fill: white;
+}

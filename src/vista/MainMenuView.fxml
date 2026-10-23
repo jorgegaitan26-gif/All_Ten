@@ -42,15 +42,15 @@
                    -fx-padding: 12 30 12 30;
                    -fx-cursor: hand;"/>
 
-    <Button fx:id="btnHistorial"
-            text="Historial"
-            onAction="#abrirHistorial"
+    <Button fx:id="btnRanking"
+            text="Ranking"
+            onAction="#abrirRanking"
             style="-fx-background-color: #7EB6E8;
                    -fx-text-fill: #2D1B69;
-                   -fx-font-size: 22px;
+                   -fx-font-size: 30px;
                    -fx-font-weight: bold;
                    -fx-background-radius: 20;
-                   -fx-padding: 10 26 10 26;
+                   -fx-padding: 12 30 12 30;
                    -fx-cursor: hand;"/>
 
     <Button fx:id="btnProbarConexion"
@@ -58,10 +58,10 @@
             onAction="#probarConexionBD"
             style="-fx-background-color: #6CA66C;
                    -fx-text-fill: white;
-                   -fx-font-size: 18px;
+                   -fx-font-size: 30px;
                    -fx-font-weight: bold;
                    -fx-background-radius: 20;
-                   -fx-padding: 10 22 10 22;
+                   -fx-padding: 12 30 12 30;
                    -fx-cursor: hand;"/>
 
 </VBox>

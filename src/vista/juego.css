@@ -17,13 +17,24 @@
     -fx-text-fill: #888780;
 }
 
+.panel-objetivos {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 18;
+    -fx-padding: 16 24;
+}
+
+.titulo-objetivos {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
 .etiqueta-tiempo {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #2D1B69;
-    -fx-background-color: #7EB6E8;
-    -fx-background-radius: 14;
-    -fx-padding: 6 18 6 18;
 }
 
 .btn-secundario {
@@ -41,11 +52,12 @@
     -fx-background-color: #E4E1D6;
     -fx-text-fill: #888780;
     -fx-background-radius: 100;
-    -fx-min-width: 34px;
-    -fx-min-height: 34px;
-    -fx-max-width: 34px;
-    -fx-max-height: 34px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
     -fx-alignment: CENTER;
+    -fx-font-size: 19px;
     -fx-font-weight: bold;
 }
 
@@ -53,11 +65,12 @@
     -fx-background-color: #97C459;
     -fx-text-fill: white;
     -fx-background-radius: 100;
-    -fx-min-width: 34px;
-    -fx-min-height: 34px;
-    -fx-max-width: 34px;
-    -fx-max-height: 34px;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
     -fx-alignment: CENTER;
+    -fx-font-size: 19px;
     -fx-font-weight: bold;
 }
 
@@ -76,6 +89,12 @@
     -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #2C2C2A;
+}
+
+.texto-resultado-parcial {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5B8F2A;
 }
 
 .texto-mensaje {
@@ -98,8 +117,21 @@
 }
 
 .tile-numero:disabled {
-    -fx-background-color: #B5D4F4;
-    -fx-opacity: 0.55;
+    -fx-background-color: #E4E1D6;
+    -fx-text-fill: #77746D;
+    -fx-border-color: #C9C5BA;
+    -fx-border-radius: 14;
+    -fx-opacity: 1;
+}
+
+.tile-numero:usado {
+    -fx-background-color: #E4E1D6;
+    -fx-text-fill: #77746D;
+}
+
+.ayuda-numeros {
+    -fx-font-size: 12px;
+    -fx-text-fill: #77746D;
 }
 
 .tile-operador {

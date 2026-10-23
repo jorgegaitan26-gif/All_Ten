@@ -6,6 +6,8 @@
       "name": "Launch All Ten",
       "request": "launch",
       "mainClass": "co.edu.poli.Allten.App.App",
+      "projectName": "all-ten",
+      "javaExec": "${env:JAVA_HOME}\\bin\\java.exe",
       "cwd": "${workspaceFolder}",
       "vmArgs": "--module-path \"${env:USERPROFILE}/Downloads/openjfx-26.0.2_windows-x64_bin-sdk/javafx-sdk-26.0.2/lib\" --add-modules javafx.controls,javafx.fxml --enable-native-access=javafx.graphics -Djava.library.path=\"${env:USERPROFILE}/Downloads/openjfx-26.0.2_windows-x64_bin-sdk/javafx-sdk-26.0.2/bin\""
     }

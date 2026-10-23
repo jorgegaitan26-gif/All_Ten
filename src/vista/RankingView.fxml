@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.poli.Allten.Controlador.RankingController"
+            styleClass="ranking-root"
+            stylesheets="@interfaz.css">
+    <padding>
+        <Insets top="28" right="34" bottom="24" left="34"/>
+    </padding>
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="ranking-header">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Ranking" styleClass="ranking-title"/>
+                <Label fx:id="lblRetoDiario" text="Mejores tiempos del reto diario" styleClass="ranking-subtitle"/>
+            </VBox>
+            <Button text="Cerrar" onAction="#cerrar" styleClass="ranking-close"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="12" styleClass="ranking-content">
+            <TableView fx:id="tablaRanking" VBox.vgrow="ALWAYS" styleClass="ranking-table">
+                <placeholder>
+                    <Label text="Aún no hay partidas completadas. ¡Sé el primero en entrar al ranking!"
+                           styleClass="ranking-empty"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="columnaPosicion" text="#" prefWidth="75"/>
+                    <TableColumn fx:id="columnaJugador" text="Jugador" prefWidth="300"/>
+                    <TableColumn fx:id="columnaTiempo" text="Tiempo" prefWidth="170"/>
+                    <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="170"/>
+                </columns>
+            </TableView>
+            <Label text="Cada jugador aparece una sola vez con su mejor tiempo." styleClass="ranking-footnote"/>
+        </VBox>
+    </center>
+</BorderPane>

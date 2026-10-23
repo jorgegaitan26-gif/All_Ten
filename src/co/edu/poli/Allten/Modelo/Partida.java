@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,16 +83,19 @@ public class Partida {
     private static final int OBJETIVO_MINIMO = 1;
     private static final int OBJETIVO_MAXIMO = 10;
     private static final double TOLERANCIA = 1e-9;
+    private static final ZoneId ZONA_RETO = ZoneId.of("America/Bogota");
 
     /** Carpeta por defecto donde {@link #exportarResultados()} guarda la imagen. */
     private static final String CARPETA_EXPORTACION = "resultados";
 
     // ----- Atributos del diagrama de clases -----
+    private int idPartida;
     private List<Integer> numerosDisponibles;
     private List<Integer> objetivosCompletados;
     private List<String> operacionesRealizadas;
     private double tiempoTotal;
     private LocalDateTime fechaFinalizacion;
+    private LocalDate fechaReto;
     private NivelDificultad nivelDificultad;
 
     /** Jugador dueno de la partida (Partida.Jugador_id_Jugador; relacion jugador 1 - 0..* partida). */
@@ -100,7 +105,7 @@ public class Partida {
     private final Cronometro cronometro;
     private final List<Expresion> historialExpresiones;
 
-    private final Random aleatorio;
+    private Random aleatorio;
 
     /** Crea una partida vacia (sin numeros ni objetivos), en dificultad FACIL; llamar a {@link #iniciarPartida()} para comenzarla. */
     public Partida() {
@@ -114,15 +119,50 @@ public class Partida {
      */
     public Partida(Jugador jugador) {
         this.jugador = jugador;
+        this.idPartida = 0;
         this.numerosDisponibles = new ArrayList<>();
         this.objetivosCompletados = new ArrayList<>();
         this.operacionesRealizadas = new ArrayList<>();
         this.tiempoTotal = 0;
         this.fechaFinalizacion = null;
+        this.fechaReto = null;
         this.nivelDificultad = NivelDificultad.FACIL;
         this.cronometro = new Cronometro();
         this.historialExpresiones = new ArrayList<>();
-        this.aleatorio = new Random();
+    }
+
+    /**
+     * Reconstruye una partida guardada en la base de datos.
+     *
+     * @param idPartida identificador persistido
+     * @param jugador jugador propietario
+     * @param tiempoTotal tiempo jugado en segundos
+     * @param operaciones operaciones guardadas
+     * @param fechaFinalizacion fecha de finalización
+     */
+    public Partida(int idPartida, Jugador jugador, double tiempoTotal,
+            List<String> operaciones, LocalDateTime fechaFinalizacion) {
+        this(idPartida, jugador, tiempoTotal, operaciones, fechaFinalizacion, null);
+    }
+
+    /**
+     * Reconstruye una partida guardada junto con la fecha de su reto diario.
+     *
+     * @param idPartida identificador persistido
+     * @param jugador jugador propietario
+     * @param tiempoTotal tiempo jugado en segundos
+     * @param operaciones operaciones guardadas
+     * @param fechaFinalizacion fecha de finalización
+     * @param fechaReto fecha común del reto diario
+     */
+    public Partida(int idPartida, Jugador jugador, double tiempoTotal,
+            List<String> operaciones, LocalDateTime fechaFinalizacion, LocalDate fechaReto) {
+        this(jugador);
+        this.idPartida = idPartida;
+        this.tiempoTotal = tiempoTotal;
+        this.operacionesRealizadas.addAll(operaciones);
+        this.fechaFinalizacion = fechaFinalizacion;
+        this.fechaReto = fechaReto;
     }
 
     // =====================================================================
@@ -144,12 +184,26 @@ public class Partida {
      * listos, arranca el cronometro.
      */
     public void iniciarPartida() {
+        iniciarPartida(fechaActualDelReto());
+    }
+
+    /**
+     * Inicia la partida con el reto determinista correspondiente a una fecha.
+     *
+     * @param fechaReto fecha del reto en la zona horaria oficial
+     */
+    public void iniciarPartida(LocalDate fechaReto) {
+        if (fechaReto == null) {
+            throw new IllegalArgumentException("La fecha del reto no puede ser nula.");
+        }
         // [A] Inicio: configurar partida (el nivel ya se fijo con setDificultad [B])
+        idPartida = 0;
         objetivosCompletados = new ArrayList<>();
         operacionesRealizadas = new ArrayList<>();
         historialExpresiones.clear();
         tiempoTotal = 0;
         fechaFinalizacion = null;
+        this.fechaReto = fechaReto;
 
         // [C] Generar 4 numeros validos
         generarNumerosValidos();
@@ -161,21 +215,46 @@ public class Partida {
     }
 
     /**
-     * Genera los 4 numeros (del 1 al 9) que permiten resolver los
-     * objetivos del 1 al 10 segun la dificultad: se sortean numeros hasta
-     * que {@link #posiblesSoluciones()} cubre los 10 objetivos.
+     * Genera de forma reproducible los 4 números del reto diario (del 1 al 9)
+     * que permiten resolver los objetivos del 1 al 10 según la dificultad.
+     * La fecha es la semilla para que todos reciban la misma combinación.
      */
     public void generarNumerosValidos() {
-
+        if (fechaReto == null) {
+            fechaReto = fechaActualDelReto();
+        }
+        aleatorio = new Random(fechaReto.toEpochDay());
         List<Integer> candidatos;
         do {
             candidatos = new ArrayList<>();
             for (int i = 0; i < CANTIDAD_NUMEROS; i++) {
                 candidatos.add(1 + aleatorio.nextInt(9));
             }
-        } while (calcularSoluciones(candidatos, nivelDificultad).size() < OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1);
+        } while (!esCombinacionEquilibrada(candidatos)
+                || calcularSoluciones(candidatos, nivelDificultad).size()
+                        < OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1);
 
         this.numerosDisponibles = candidatos;
+    }
+
+    /** Evita retos con menos de tres valores distintos o un valor repetido más de dos veces. */
+    private static boolean esCombinacionEquilibrada(List<Integer> numeros) {
+        int cantidadDistintos = 0;
+        for (int i = 0; i < numeros.size(); i++) {
+            int numero = numeros.get(i);
+            if (Collections.frequency(numeros, numero) > 2) {
+                return false;
+            }
+            if (numeros.indexOf(numero) == i) {
+                cantidadDistintos++;
+            }
+        }
+        return cantidadDistintos >= 3;
+    }
+
+    /** @return fecha actual del reto según la zona horaria oficial de Colombia */
+    public static LocalDate fechaActualDelReto() {
+        return LocalDate.now(ZONA_RETO);
     }
 
     /**
@@ -596,6 +675,16 @@ public class Partida {
     // ACCESO A LOS DATOS
     // =====================================================================
 
+    /** @return identificador persistido de la partida, o cero si aún no se ha guardado */
+    public int getIdPartida() {
+        return idPartida;
+    }
+
+    /** @param idPartida identificador asignado por la base de datos */
+    public void setIdPartida(int idPartida) {
+        this.idPartida = idPartida;
+    }
+
     /** Da acceso a los numeros de la partida.
      * @return los 4 numeros disponibles para esta partida (vista de solo lectura) */
     public List<Integer> getNumerosDisponibles() {
@@ -630,6 +719,11 @@ public class Partida {
      * @return la fecha y hora en que se completaron los 10 objetivos, o {@code null} si la partida sigue en curso */
     public LocalDateTime getFechaFinalizacion() {
         return fechaFinalizacion;
+    }
+
+    /** @return fecha del reto diario, o {@code null} para partidas antiguas sin fecha registrada */
+    public LocalDate getFechaReto() {
+        return fechaReto;
     }
 
     /** Da acceso a la dificultad.
