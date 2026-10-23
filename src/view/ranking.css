@@ -1,0 +1,80 @@
+/* Fondo de la ventana del ranking: crema, igual que el menú principal */
+.ranking-root {
+    -fx-background-color: #f1efe8;
+}
+
+/* Título "Ranking": solo texto, sin forma de botón */
+.ranking-titulo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.ranking-subtitulo {
+    -fx-font-size: 16px;
+    -fx-text-fill: #2D1B69;
+    -fx-opacity: 0.8;
+}
+
+.ranking-btn-cerrar {
+    -fx-background-color: #F5A623;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18 8 18;
+    -fx-cursor: hand;
+}
+
+/* Tabla */
+.ranking-tabla {
+    -fx-font-size: 15px;
+    -fx-background-color: transparent;
+}
+
+.ranking-tabla .column-header-background {
+    -fx-background-color: #7EB6E8;
+}
+
+.ranking-tabla .column-header,
+.ranking-tabla .filler {
+    -fx-background-color: #7EB6E8;
+    -fx-size: 42px;
+}
+
+.ranking-tabla .column-header .label {
+    -fx-text-fill: #2D1B69;
+    -fx-font-weight: bold;
+}
+
+.ranking-tabla .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-cell-size: 40px;
+}
+
+.ranking-tabla .table-row-cell:odd {
+    -fx-background-color: #F6F3EA;
+}
+
+.ranking-tabla .table-cell {
+    -fx-text-fill: #2D1B69;
+    -fx-border-color: transparent;
+}
+
+/* Tres primeros puestos */
+.ranking-tabla .table-cell.ranking-oro {
+    -fx-text-fill: #C99700;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.ranking-tabla .table-cell.ranking-plata {
+    -fx-text-fill: #7F8C8D;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.ranking-tabla .table-cell.ranking-bronce {
+    -fx-text-fill: #A0522D;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}

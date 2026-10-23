@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import model.EntradaRanking;
 import model.Partida;
 
 /**
@@ -177,6 +178,52 @@ public class DAOPartida implements CRUD<Partida> {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     lista.add(mapear(rs));
+                }
+            }
+        }
+
+        return lista;
+    }
+
+    /**
+     * Consulta el ranking: las partidas más rápidas, con el nickname de quien
+     * las jugó y la fecha y hora exactas en que terminaron. Si dos partidas
+     * tienen el mismo tiempo, va primero la que se logró antes.
+     *
+     * @param limite cantidad máxima de puestos a devolver (mayor que 0)
+     * @return lista del más rápido al más lento, con la posición ya asignada
+     * @throws IllegalArgumentException si el límite no es positivo
+     * @throws Exception si ocurre un error durante la consulta
+     */
+    public List<EntradaRanking> readRanking(int limite) throws Exception {
+
+        if (limite <= 0) {
+            throw new IllegalArgumentException("El límite debe ser mayor que 0.");
+        }
+
+        List<EntradaRanking> lista = new ArrayList<>();
+
+        Connection con = ConexionBD.getInstancia().getConexion();
+
+        String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
+                + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
+                + "WHERE p.tiempoTotal IS NOT NULL "
+                + "ORDER BY p.tiempoTotal ASC, p.fechaFinalizacion ASC, p.id_Partida ASC LIMIT ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, limite);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                int posicion = 1;
+
+                while (rs.next()) {
+                    lista.add(new EntradaRanking(
+                            posicion++,
+                            rs.getString("nickname"),
+                            rs.getInt("tiempoTotal"),
+                            rs.getTimestamp("fechaFinalizacion")));
                 }
             }
         }

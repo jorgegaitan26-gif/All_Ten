@@ -41,4 +41,16 @@
                    -fx-padding: 12 30 12 30;
                    -fx-cursor: hand;"/>
 
+
+    <Button fx:id="btnRanking"
+            text="Ranking"
+            onAction="#abrirRanking"
+            style="-fx-background-color: #97c459;
+                   -fx-text-fill: #2D1B69;
+                   -fx-font-size: 30px;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 20;
+                   -fx-padding: 12 30 12 30;
+                   -fx-cursor: hand;"/>
+
 </VBox>

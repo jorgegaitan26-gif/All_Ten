@@ -3,6 +3,7 @@ package servicios;
 import java.util.Date;
 import java.util.List;
 
+import model.EntradaRanking;
 import model.Jugador;
 import model.Partida;
 
@@ -74,6 +75,13 @@ public class PruebaCRUD {
             List<Partida> top = daoP.readTop(1000);
             verificar("Partida.readTop ordena por menor tiempo", top.size() >= 2 && ordenadoPorTiempo(top));
 
+            List<EntradaRanking> ranking = daoP.readRanking(1000);
+            int posRapida = indiceDe(ranking, j.getNickname(), 40);
+            int posLenta = indiceDe(ranking, j.getNickname(), 95);
+            verificar("Partida.readRanking ordena por velocidad y trae nickname y fecha",
+                    posRapida >= 0 && posLenta > posRapida && ranking.get(0).getPosicion() == 1
+                            && ranking.get(posRapida).getFechaFinalizacion() != null);
+
             p1.setTiempoTotal(80);
             p1.setOperacionesRealizadas("2*3+4");
             p1.setFechaFinalizacion(null); // update conserva la fecha guardada
@@ -131,6 +139,15 @@ public class PruebaCRUD {
         if (!ok) {
             fallos++;
         }
+    }
+
+    private static int indiceDe(List<EntradaRanking> lista, String nickname, int tiempo) {
+        for (int i = 0; i < lista.size(); i++) {
+            if (nickname.equals(lista.get(i).getNickname()) && lista.get(i).getTiempoTotal() == tiempo) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static boolean contieneJugador(List<Jugador> lista, int id) {
