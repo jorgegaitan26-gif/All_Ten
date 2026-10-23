@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.AyudaController"
+            styleClass="ayuda-root"
+            stylesheets="@ayuda.css">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- ENCABEZADO -->
+    <top>
+        <VBox spacing="14">
+
+            <padding>
+                <Insets top="0" right="0" bottom="15" left="0"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="20">
+
+                <Label text="Ayuda"
+                       styleClass="ayuda-titulo"/>
+
+                <Label maxWidth="Infinity"
+                       HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="btnCerrar"
+                        text="Cerrar"
+                        styleClass="ayuda-btn-cerrar"
+                        onAction="#cerrar"/>
+
+            </HBox>
+
+            <Label fx:id="lblNumeros"
+                   styleClass="ayuda-numeros"/>
+
+        </VBox>
+    </top>
+
+    <!-- SOLUCIONES POR NÚMERO -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    styleClass="ayuda-scroll">
+
+            <content>
+                <VBox fx:id="contenedorSoluciones"
+                      spacing="10"
+                      styleClass="ayuda-lista"/>
+            </content>
+
+        </ScrollPane>
+    </center>
+
+</BorderPane>

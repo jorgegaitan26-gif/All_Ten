@@ -1,0 +1,77 @@
+/* Fondo de la ventana de ayuda: crema, igual que el menú principal */
+.ayuda-root {
+    -fx-background-color: #f1efe8;
+}
+
+/* Título "Ayuda": solo texto, sin forma de botón */
+.ayuda-titulo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.ayuda-btn-cerrar {
+    -fx-background-color: #F5A623;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18 8 18;
+    -fx-cursor: hand;
+}
+
+.ayuda-numeros {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+/* Lista con desplazamiento, sin el borde gris por defecto */
+.ayuda-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.ayuda-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.ayuda-lista {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8 0 0;
+}
+
+/* Una fila por cada solución */
+.ayuda-fila {
+    -fx-background-color: #7EB6E8;
+    -fx-background-radius: 14;
+    -fx-padding: 10 14 10 14;
+}
+
+/* Círculo naranja con el número de la solución (1, 2, 3...) */
+.ayuda-insignia {
+    -fx-background-color: #F5A623;
+    -fx-background-radius: 50;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+}
+
+.ayuda-solucion {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.ayuda-sin-solucion {
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+    -fx-text-fill: #2D1B69;
+    -fx-opacity: 0.7;
+}
