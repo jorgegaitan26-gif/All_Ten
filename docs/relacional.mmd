@@ -1,0 +1,16 @@
+erDiagram
+    JUGADOR {
+        int id_jugador PK
+        string nickname UK
+        timestamp fecha_registro
+    }
+
+    PARTIDA {
+        int id_partida PK
+        int id_jugador FK
+        int tiempo_segundos
+        string numeros_reto
+        timestamp fecha_partida
+    }
+
+    JUGADOR ||--o{ PARTIDA : "registra"
