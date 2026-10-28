@@ -39,6 +39,12 @@ import javax.imageio.ImageIO;
  */
 public class Partida {
 
+    /** Modos de juego disponibles. */
+    public enum ModoPartida {
+        RETO_DIARIO,
+        LIBRE
+    }
+
     /**
      * Niveles de dificultad de la partida y los operadores que permite cada uno
      * (las potencias y raices solo se permiten en los niveles avanzados).
@@ -97,6 +103,7 @@ public class Partida {
     private LocalDateTime fechaFinalizacion;
     private LocalDate fechaReto;
     private NivelDificultad nivelDificultad;
+    private ModoPartida modoPartida;
 
     /** Jugador dueno de la partida (Partida.Jugador_id_Jugador; relacion jugador 1 - 0..* partida). */
     private Jugador jugador;
@@ -127,6 +134,7 @@ public class Partida {
         this.fechaFinalizacion = null;
         this.fechaReto = null;
         this.nivelDificultad = NivelDificultad.FACIL;
+        this.modoPartida = ModoPartida.RETO_DIARIO;
         this.cronometro = new Cronometro();
         this.historialExpresiones = new ArrayList<>();
     }
@@ -153,7 +161,7 @@ public class Partida {
      * @param tiempoTotal tiempo jugado en segundos
      * @param operaciones operaciones guardadas
      * @param fechaFinalizacion fecha de finalización
-     * @param fechaReto fecha común del reto diario
+     * @param fechaReto fecha común del reto diario, o {@code null} para una partida libre
      */
     public Partida(int idPartida, Jugador jugador, double tiempoTotal,
             List<String> operaciones, LocalDateTime fechaFinalizacion, LocalDate fechaReto) {
@@ -163,6 +171,7 @@ public class Partida {
         this.operacionesRealizadas.addAll(operaciones);
         this.fechaFinalizacion = fechaFinalizacion;
         this.fechaReto = fechaReto;
+        this.modoPartida = fechaReto == null ? ModoPartida.LIBRE : ModoPartida.RETO_DIARIO;
     }
 
     // =====================================================================
@@ -187,6 +196,11 @@ public class Partida {
         iniciarPartida(fechaActualDelReto());
     }
 
+    /** Inicia una partida libre con una combinación aleatoria no ligada a la fecha. */
+    public void iniciarPartidaLibre() {
+        prepararPartida(null, ModoPartida.LIBRE);
+    }
+
     /**
      * Inicia la partida con el reto determinista correspondiente a una fecha.
      *
@@ -196,6 +210,10 @@ public class Partida {
         if (fechaReto == null) {
             throw new IllegalArgumentException("La fecha del reto no puede ser nula.");
         }
+        prepararPartida(fechaReto, ModoPartida.RETO_DIARIO);
+    }
+
+    private void prepararPartida(LocalDate fechaReto, ModoPartida modoPartida) {
         // [A] Inicio: configurar partida (el nivel ya se fijo con setDificultad [B])
         idPartida = 0;
         objetivosCompletados = new ArrayList<>();
@@ -204,6 +222,7 @@ public class Partida {
         tiempoTotal = 0;
         fechaFinalizacion = null;
         this.fechaReto = fechaReto;
+        this.modoPartida = modoPartida;
 
         // [C] Generar 4 numeros validos
         generarNumerosValidos();
@@ -217,13 +236,17 @@ public class Partida {
     /**
      * Genera de forma reproducible los 4 números del reto diario (del 1 al 9)
      * que permiten resolver los objetivos del 1 al 10 según la dificultad.
-     * La fecha es la semilla para que todos reciban la misma combinación.
+     * En modo diario, la fecha es la semilla para compartir la combinación.
+     * En modo libre, cada partida usa una combinación aleatoria nueva.
      */
     public void generarNumerosValidos() {
-        if (fechaReto == null) {
+        if (modoPartida == ModoPartida.RETO_DIARIO && fechaReto == null) {
             fechaReto = fechaActualDelReto();
         }
-        aleatorio = new Random(fechaReto.toEpochDay());
+        List<Integer> numerosAnteriores = numerosDisponibles;
+        aleatorio = modoPartida == ModoPartida.RETO_DIARIO
+                ? new Random(fechaReto.toEpochDay())
+                : new Random();
         List<Integer> candidatos;
         do {
             candidatos = new ArrayList<>();
@@ -232,9 +255,22 @@ public class Partida {
             }
         } while (!esCombinacionEquilibrada(candidatos)
                 || calcularSoluciones(candidatos, nivelDificultad).size()
-                        < OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1);
+                        < OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1
+                || (modoPartida == ModoPartida.LIBRE
+                        && mismaCombinacion(candidatos, numerosAnteriores)));
 
         this.numerosDisponibles = candidatos;
+    }
+
+    private static boolean mismaCombinacion(List<Integer> primero, List<Integer> segundo) {
+        if (primero.size() != segundo.size()) {
+            return false;
+        }
+        List<Integer> primeroOrdenado = new ArrayList<>(primero);
+        List<Integer> segundoOrdenado = new ArrayList<>(segundo);
+        Collections.sort(primeroOrdenado);
+        Collections.sort(segundoOrdenado);
+        return primeroOrdenado.equals(segundoOrdenado);
     }
 
     /** Evita retos con menos de tres valores distintos o un valor repetido más de dos veces. */
@@ -330,7 +366,16 @@ public class Partida {
 
     /** Reinicia la partida: nuevos numeros, objetivos vacios, cronometro en cero. */
     public void reiniciarPartida() {
-        iniciarPartida();
+        if (modoPartida == ModoPartida.LIBRE) {
+            iniciarPartidaLibre();
+        } else {
+            iniciarPartida();
+        }
+    }
+
+    /** @return modo de juego de esta partida */
+    public ModoPartida getModoPartida() {
+        return modoPartida;
     }
 
     /**
@@ -714,7 +759,7 @@ public class Partida {
         return fechaFinalizacion;
     }
 
-    /** @return fecha del reto diario, o {@code null} para partidas antiguas sin fecha registrada */
+    /** @return fecha del reto diario, o {@code null} si la partida es libre o no tiene fecha registrada */
     public LocalDate getFechaReto() {
         return fechaReto;
     }

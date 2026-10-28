@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
 
 /** Implementación MySQL de las operaciones CRUD de partidas. */
-public class DAOPartida implements IPartidaDAO {
+public class DAOPartida implements CRUD<Partida> {
 
     private static final String COLUMNAS = "p.id_Partida, p.tiempoTotal, p.Jugador_id_Jugador, "
             + "j.nickname, p.operacionesRealizadas, p.fechaFinalizacion, p.fechaReto";
@@ -62,7 +63,6 @@ public class DAOPartida implements IPartidaDAO {
         return consultar(sql, statement -> { });
     }
 
-    @Override
     public List<Partida> readByJugador(int idJugador) throws SQLException {
         validarId(idJugador);
         String sql = "SELECT " + COLUMNAS + " FROM Partida p "
@@ -72,7 +72,6 @@ public class DAOPartida implements IPartidaDAO {
         return consultar(sql, statement -> statement.setInt(1, idJugador));
     }
 
-    @Override
     public List<Partida> readTop(int limite) throws SQLException {
         if (limite <= 0) {
             throw new IllegalArgumentException("El límite debe ser mayor que cero.");
@@ -87,7 +86,6 @@ public class DAOPartida implements IPartidaDAO {
         return consultar(sql, statement -> statement.setInt(1, limite));
     }
 
-    @Override
     public List<Partida> readTopForDate(LocalDate fechaReto, int limite) throws SQLException {
         if (fechaReto == null) {
             throw new IllegalArgumentException("La fecha del reto no puede ser nula.");
@@ -136,7 +134,6 @@ public class DAOPartida implements IPartidaDAO {
         }
     }
 
-    @Override
     public int deleteByJugador(int idJugador) throws SQLException {
         validarId(idJugador);
         String sql = "DELETE FROM Partida WHERE Jugador_id_Jugador = ?";
@@ -175,8 +172,13 @@ public class DAOPartida implements IPartidaDAO {
         if (partida.getFechaFinalizacion() == null) {
             throw new IllegalArgumentException("No se puede guardar una partida que no ha finalizado.");
         }
-        if (partida.getFechaReto() == null) {
-            throw new IllegalArgumentException("La partida debe tener una fecha de reto.");
+        if (partida.getModoPartida() == Partida.ModoPartida.RETO_DIARIO
+                && partida.getFechaReto() == null) {
+            throw new IllegalArgumentException("El reto diario debe tener una fecha.");
+        }
+        if (partida.getModoPartida() == Partida.ModoPartida.LIBRE
+                && partida.getFechaReto() != null) {
+            throw new IllegalArgumentException("Una partida libre no puede tener fecha de reto diario.");
         }
     }
 
@@ -191,7 +193,11 @@ public class DAOPartida implements IPartidaDAO {
         statement.setInt(2, partida.getJugador().getIdJugador());
         statement.setString(3, String.join("\n", partida.getOperacionesRealizadas()));
         statement.setTimestamp(4, Timestamp.valueOf(partida.getFechaFinalizacion()));
-        statement.setDate(5, java.sql.Date.valueOf(partida.getFechaReto()));
+        if (partida.getFechaReto() == null) {
+            statement.setNull(5, Types.DATE);
+        } else {
+            statement.setDate(5, java.sql.Date.valueOf(partida.getFechaReto()));
+        }
     }
 
     private static Partida mapear(ResultSet resultado) throws SQLException {

@@ -31,9 +31,20 @@
                    -fx-padding: 12 30 12 30;
                    -fx-cursor: hand;"/>
 
-    <Button fx:id="btnJugar"
-            text="Jugar"
-            onAction="#jugar"
+    <Button fx:id="btnRetoDiario"
+            text="Reto diario"
+            onAction="#jugarRetoDiario"
+            style="-fx-background-color: #7EB6E8;
+                   -fx-text-fill: #2D1B69;
+                   -fx-font-size: 30px;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 20;
+                   -fx-padding: 12 30 12 30;
+                   -fx-cursor: hand;"/>
+
+    <Button fx:id="btnPartidaLibre"
+            text="Partida libre"
+            onAction="#jugarPartidaLibre"
             style="-fx-background-color: #7EB6E8;
                    -fx-text-fill: #2D1B69;
                    -fx-font-size: 30px;
@@ -47,17 +58,6 @@
             onAction="#abrirRanking"
             style="-fx-background-color: #7EB6E8;
                    -fx-text-fill: #2D1B69;
-                   -fx-font-size: 30px;
-                   -fx-font-weight: bold;
-                   -fx-background-radius: 20;
-                   -fx-padding: 12 30 12 30;
-                   -fx-cursor: hand;"/>
-
-    <Button fx:id="btnProbarConexion"
-            text="Probar conexión con la base de datos"
-            onAction="#probarConexionBD"
-            style="-fx-background-color: #6CA66C;
-                   -fx-text-fill: white;
                    -fx-font-size: 30px;
                    -fx-font-weight: bold;
                    -fx-background-radius: 20;

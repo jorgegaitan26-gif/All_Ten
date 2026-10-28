@@ -21,7 +21,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import co.edu.poli.Allten.DAO.IPartidaDAO;
+import co.edu.poli.Allten.DAO.DAOPartida;
 import co.edu.poli.Allten.Modelo.Expresion;
 import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
@@ -44,6 +44,11 @@ public class JuegoController {
     @FXML private Label lblMensaje;
     @FXML private Label lblTiempo;
     @FXML private Label lblTiempoFinal;
+    @FXML private Label lblModoPartida;
+    @FXML private Label lblTituloVictoria;
+    @FXML private Label lblInfoVictoria;
+    @FXML private Button btnJugarOtraVez;
+    @FXML private Button btnReiniciar;
     @FXML private StackPane panelVictoria;
     @FXML private VBox panelAyuda;
     @FXML private FlowPane listaAyuda;
@@ -53,7 +58,7 @@ public class JuegoController {
     private Jugador jugador;
     private Partida partida;
     private Expresion intentoActual;
-    private IPartidaDAO partidaDAO;
+    private DAOPartida partidaDAO;
     private boolean partidaGuardada;
     private boolean ayudaCargada;
 
@@ -101,17 +106,33 @@ public class JuegoController {
      *
      * @param jugador jugador identificado en el menu principal
      */
-    public void setPartidaDAO(IPartidaDAO partidaDAO) {
+    public void setPartidaDAO(DAOPartida partidaDAO) {
         this.partidaDAO = partidaDAO;
     }
 
-    public void iniciarPartida(Jugador jugador) {
+    public void iniciarPartida(Jugador jugador, Partida.ModoPartida modoPartida) {
+        if (modoPartida == null) {
+            throw new IllegalArgumentException("El modo de partida no puede ser nulo.");
+        }
 
         this.jugador = jugador;
         partida = jugador.vincularNuevaPartida();
-        partida.iniciarPartida();
+        if (modoPartida == Partida.ModoPartida.LIBRE) {
+            partida.iniciarPartidaLibre();
+        } else {
+            partida.iniciarPartida();
+        }
         partidaGuardada = false;
         intentoActual = partida.crearNuevoIntento();
+
+        boolean retoDiario = modoPartida == Partida.ModoPartida.RETO_DIARIO;
+        lblModoPartida.setText(retoDiario ? "Reto diario" : "Partida libre");
+        btnReiniciar.setText(retoDiario ? "Reiniciar reto" : "Nueva partida");
+        btnJugarOtraVez.setText(retoDiario ? "Repetir reto diario" : "Nueva partida");
+        lblTituloVictoria.setText(retoDiario ? "Completaste el reto diario!" : "Completaste la partida!");
+        lblInfoVictoria.setText(retoDiario
+                ? "Puedes repetir este reto; el ranking diario conserva tu mejor tiempo."
+                : "Cada nueva partida genera una combinación diferente.");
 
         construirFilaObjetivos();
         construirFilaOperadores();

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Partida (
     Jugador_id_Jugador INT NOT NULL,
     operacionesRealizadas TEXT NOT NULL,
     fechaFinalizacion DATETIME NOT NULL,
-    fechaReto DATE NOT NULL,
+    fechaReto DATE NULL,
     PRIMARY KEY (id_Partida),
     KEY idx_partida_jugador (Jugador_id_Jugador),
     KEY idx_partida_fecha_finalizacion (fechaFinalizacion),

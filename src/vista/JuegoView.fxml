@@ -31,6 +31,8 @@
 
                     <Label text="All Ten" styleClass="titulo-juego"/>
 
+                    <Label fx:id="lblModoPartida" styleClass="subtitulo"/>
+
                     <Label maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
 
                     <Label fx:id="lblTiempo" text="00:00" styleClass="etiqueta-tiempo"/>
@@ -116,9 +118,12 @@
 
         <VBox styleClass="tarjeta-victoria" spacing="16" alignment="CENTER" maxWidth="480" maxHeight="520">
 
-            <Label text="Completaste el reto!" styleClass="titulo-victoria"/>
+            <Label fx:id="lblTituloVictoria" text="Completaste el reto!" styleClass="titulo-victoria"/>
 
             <Label fx:id="lblTiempoFinal" styleClass="texto-tiempo-final"/>
+            <Label fx:id="lblInfoVictoria"
+                   text="Puedes repetir este reto; el ranking diario conserva tu mejor tiempo."
+                   wrapText="true" style="-fx-text-alignment: center; -fx-text-fill: #77746d;"/>
 
             <HBox spacing="14" alignment="CENTER">
                 <Button fx:id="btnJugarOtraVez" text="Jugar otra vez" styleClass="btn-comprobar" onAction="#jugarOtraVez"/>

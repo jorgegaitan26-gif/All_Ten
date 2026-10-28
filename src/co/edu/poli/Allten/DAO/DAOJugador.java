@@ -11,7 +11,7 @@ import java.util.List;
 import co.edu.poli.Allten.Modelo.Jugador;
 
 /** Implementación MySQL de las operaciones CRUD de jugadores. */
-public class DAOJugador implements IJugadorDAO {
+public class DAOJugador implements CRUD<Jugador>, Jugador.RegistroJugadores<SQLException> {
 
     @Override
     public Jugador create(Jugador jugador) throws SQLException {
@@ -47,7 +47,6 @@ public class DAOJugador implements IJugadorDAO {
         }
     }
 
-    @Override
     public Jugador readByNickname(String nickname) throws SQLException {
         if (nickname == null || nickname.isBlank()) {
             throw new IllegalArgumentException("El nickname no puede estar vacío.");
@@ -60,6 +59,17 @@ public class DAOJugador implements IJugadorDAO {
                 return resultado.next() ? mapear(resultado) : null;
             }
         }
+    }
+
+    @Override
+    public Jugador buscarPorNickname(String nickname) throws SQLException {
+        return readByNickname(nickname);
+    }
+
+    @Override
+    public Integer registrarJugador(String nickname) throws SQLException {
+        Jugador jugador = create(new Jugador(nickname));
+        return jugador.getIdJugador();
     }
 
     @Override

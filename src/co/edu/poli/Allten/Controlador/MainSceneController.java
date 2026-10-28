@@ -22,11 +22,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import co.edu.poli.Allten.DAO.ConexionBD;
 import co.edu.poli.Allten.DAO.DAOJugador;
 import co.edu.poli.Allten.DAO.DAOPartida;
-import co.edu.poli.Allten.DAO.IJugadorDAO;
-import co.edu.poli.Allten.DAO.IPartidaDAO;
 import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
 
@@ -39,21 +36,20 @@ import co.edu.poli.Allten.Modelo.Partida;
  */
 public class MainSceneController {
 
-    private IJugadorDAO jugadorDAO = new DAOJugador();
-    private IPartidaDAO partidaDAO = new DAOPartida();
+    private DAOJugador jugadorDAO = new DAOJugador();
+    private DAOPartida partidaDAO = new DAOPartida();
 
     /** Constructor por defecto; JavaFX lo invoca al cargar el FXML de esta pantalla. */
     public MainSceneController() {
     }
 
-    @FXML
-    private Button btnJugar;
+    @FXML private Button btnRetoDiario;
 
-    public void setPartidaDAO(IPartidaDAO partidaDAO) {
+    public void setPartidaDAO(DAOPartida partidaDAO) {
         this.partidaDAO = partidaDAO;
     }
 
-    public void setJugadorDAO(IJugadorDAO jugadorDAO) {
+    public void setJugadorDAO(DAOJugador jugadorDAO) {
         this.jugadorDAO = jugadorDAO;
     }
 
@@ -75,16 +71,20 @@ public class MainSceneController {
     }
 
     /**
-     * Maneja el boton "Jugar": pide el nickname del jugador y, si lo
-     * escribe, carga JuegoView.fxml, le entrega el control a
-     * {@link JuegoController#iniciarPartida(Jugador)} y reemplaza la escena
-     * de la ventana actual por la del juego.
-     *
-     * @throws Exception si el archivo FXML del juego no se puede cargar
+     * Inicia el reto diario para el nickname indicado.
      */
     @FXML
-    private void jugar() throws Exception {
+    private void jugarRetoDiario() throws Exception {
+        iniciarPartida(Partida.ModoPartida.RETO_DIARIO);
+    }
 
+    /** Inicia una partida libre con números nuevos. */
+    @FXML
+    private void jugarPartidaLibre() throws Exception {
+        iniciarPartida(Partida.ModoPartida.LIBRE);
+    }
+
+    private void iniciarPartida(Partida.ModoPartida modoPartida) throws Exception {
         String nickname = pedirNickname();
         if (nickname == null) {
             return; // el jugador cancelo el dialogo o no escribio nada
@@ -97,9 +97,9 @@ public class MainSceneController {
 
             JuegoController controlador = loader.getController();
             controlador.setPartidaDAO(partidaDAO);
-            controlador.iniciarPartida(jugador);
+            controlador.iniciarPartida(jugador, modoPartida);
 
-            Stage ventanaActual = (Stage) btnJugar.getScene().getWindow();
+            Stage ventanaActual = (Stage) btnRetoDiario.getScene().getWindow();
             ventanaActual.setScene(new Scene(root, 1000, 700));
             ventanaActual.setTitle("All Ten - " + jugador.getNickname());
         } catch (SQLException e) {
@@ -122,14 +122,14 @@ public class MainSceneController {
     private String pedirNickname() {
         Dialog<String> dialogo = new Dialog<>();
         dialogo.setTitle("All Ten");
-        dialogo.initOwner(btnJugar.getScene().getWindow());
+        dialogo.initOwner(btnRetoDiario.getScene().getWindow());
         dialogo.getDialogPane().getStyleClass().add("nickname-dialog");
         dialogo.getDialogPane().getStylesheets().add(
                 getClass().getResource("/vista/interfaz.css").toExternalForm());
 
         Label titulo = new Label("¿Listo para jugar?");
         titulo.getStyleClass().add("nickname-title");
-        Label descripcion = new Label("Elige un nickname para guardar tu tiempo en el ranking.");
+        Label descripcion = new Label("Elige un nickname para guardar tus partidas.");
         descripcion.getStyleClass().add("nickname-description");
 
         TextField campoNickname = new TextField();
@@ -167,7 +167,7 @@ public class MainSceneController {
 
             Stage ventana = new Stage();
             ventana.setTitle("All Ten - Ranking");
-            ventana.initOwner(btnJugar.getScene().getWindow());
+            ventana.initOwner(btnRetoDiario.getScene().getWindow());
             ventana.initModality(Modality.WINDOW_MODAL);
             ventana.setScene(new Scene(root, 820, 560));
             ventana.showAndWait();
@@ -179,20 +179,6 @@ public class MainSceneController {
             alerta.setHeaderText("No se pudo cargar la pantalla del ranking.");
             alerta.setContentText(e.getMessage());
             alerta.showAndWait();
-        }
-    }
-
-    @FXML
-    private void probarConexionBD() {
-        try {
-            ConexionBD.probarConexion();
-            Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-            alerta.setTitle("Conexión a la base de datos");
-            alerta.setHeaderText("Conexión exitosa");
-            alerta.setContentText("La aplicación se conectó a MySQL y ejecutó SELECT 1.");
-            alerta.showAndWait();
-        } catch (SQLException e) {
-            mostrarErrorPersistencia("No se pudo conectar con MySQL.", e);
         }
     }
 

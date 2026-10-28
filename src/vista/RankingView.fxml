@@ -42,7 +42,8 @@
                     <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="170"/>
                 </columns>
             </TableView>
-            <Label text="Cada jugador aparece una sola vez con su mejor tiempo." styleClass="ranking-footnote"/>
+            <Label text="Puedes jugar cuantas veces quieras; el ranking muestra tu mejor tiempo del reto."
+                   styleClass="ranking-footnote"/>
         </VBox>
     </center>
 </BorderPane>

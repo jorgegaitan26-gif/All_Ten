@@ -26,29 +26,32 @@ crear, consultar, actualizar y eliminar registros. `DAOJugador` también busca
 por nickname; `DAOPartida` permite consultar partidas por jugador y obtener un
 ranking diario:
 
-1. Copia `.env.example` a `.env` en la raíz del proyecto y configura
-   `ALL_TEN_DB_USER` y `ALL_TEN_DB_PASSWORD`. No agregues `.env` al repositorio;
-   comparte solo el archivo de ejemplo.
-2. Inicia MySQL y ejecuta el script
+1. Inicia MySQL y ejecuta el script
    [`database/create_tables.sql`](database/create_tables.sql) en MySQL Workbench
    o con el cliente de MySQL. El script crea la base `all_ten_db` y las tablas
    `Jugador` y `Partida` que utiliza el DAO.
    Si la tabla `Partida` ya existía antes del reto diario, ejecuta también
    [`database/migrate_daily_challenge.sql`](database/migrate_daily_challenge.sql).
+   Para habilitar partidas libres en una base existente, ejecuta después
+   [`database/migrate_free_play.sql`](database/migrate_free_play.sql), que permite
+   guardar partidas sin fecha de reto diario.
    Si MySQL muestra `Data too long for column 'operacionesRealizadas'`, ejecuta
    [`database/fix_operaciones_partida.sql`](database/fix_operaciones_partida.sql)
    para ampliar la columna de operaciones sin perder su contenido.
-3. Ejecuta la aplicación con `mvn javafx:run` para que Maven incluya las
+2. Ejecuta la aplicación con `mvn javafx:run` para que Maven incluya las
    dependencias necesarias.
 
 Al iniciar una partida, se busca el nickname y se registra el jugador si aún no
-existe. El reto se genera de forma determinista a partir de la fecha en la zona
-horaria `America/Bogota`: todos los jugadores reciben los mismos cuatro números
-ese día, y la combinación conserva la posibilidad de completar los diez
-objetivos. Al completar el reto, se guardan la duración, la fecha de
-finalización, la fecha del reto y las operaciones. El botón **Ranking** muestra
-los diez mejores tiempos del reto actual, con una sola entrada por jugador y su
-mejor partida de ese día. Las partidas anteriores a la migración no aparecen en
-el ranking diario porque no tienen registrada la fecha de su reto.
-**Probar conexión con la base de datos** permite comprobar la conexión; los
-errores de persistencia se muestran en pantalla.
+existe. Se puede elegir entre dos modos:
+
+- **Reto diario**: se genera de forma determinista a partir de la fecha en la
+  zona horaria `America/Bogota`. Todos reciben los mismos cuatro números del día
+  y se puede repetir el reto para mejorar el tiempo.
+- **Partida libre**: cada partida genera una combinación aleatoria nueva,
+  independiente de la fecha. Al reiniciarla se genera otra combinación.
+
+Al completar una partida se guarda su duración, fecha de finalización,
+operaciones y, solo para el reto diario, la fecha del reto. El botón
+**Ranking** muestra los diez mejores tiempos del reto actual, con una sola
+entrada por jugador y su mejor partida de ese día; las partidas libres no se
+incluyen en ese ranking.
