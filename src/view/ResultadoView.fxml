@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controller.ResultadoController"
+      styleClass="resultado-root"
+      stylesheets="@resultado.css"
+      alignment="TOP_CENTER"
+      spacing="12"
+      prefWidth="500">
+
+    <padding>
+        <Insets top="20" right="30" bottom="12" left="30"/>
+    </padding>
+
+    <!-- ============ TARJETA COMPARTIBLE (esto es lo que se exporta) ============ -->
+    <VBox fx:id="tarjeta"
+          styleClass="tarjeta-resultado"
+          alignment="TOP_CENTER"
+          spacing="8"
+          prefWidth="440"
+          minWidth="440"
+          maxWidth="440">
+
+        <Label text="ALL TEN" styleClass="marca"/>
+
+        <Label text="¡RETO COMPLETADO!" styleClass="titulo-reto"/>
+
+        <VBox alignment="CENTER" spacing="0" styleClass="panel-tiempo">
+            <Label text="TIEMPO TOTAL" styleClass="etiqueta-tiempo"/>
+            <Label fx:id="lblTiempo" text="00:00" styleClass="tiempo-grande"/>
+        </VBox>
+
+        <Label fx:id="lblCategoria" text="RETO COMPLETADO" styleClass="badge-velocidad"/>
+
+        <FlowPane fx:id="panelNumeros"
+                  hgap="6"
+                  vgap="6"
+                  alignment="CENTER"
+                  prefWrapLength="380"
+                  maxWidth="380"/>
+
+        <VBox alignment="CENTER" spacing="0">
+            <Label fx:id="lblJugador" text="Jugador" styleClass="jugador-nombre"/>
+            <Label fx:id="lblFecha" text="" styleClass="fecha"/>
+        </VBox>
+
+        <VBox fx:id="cajaOperaciones"
+              styleClass="caja-operaciones"
+              alignment="CENTER"
+              spacing="2"
+              maxWidth="380">
+
+            <Label text="OPERACIONES" styleClass="etiqueta-operaciones"/>
+            <Label fx:id="lblOperaciones" wrapText="true" styleClass="texto-operaciones"/>
+        </VBox>
+
+        <Label text="¿Puedes superarme?" styleClass="pie-tarjeta"/>
+
+    </VBox>
+
+    <!-- ============ ACCIONES (no salen en la imagen) ============ -->
+    <HBox alignment="CENTER" spacing="10">
+
+        <Button fx:id="btnGuardar"
+                text="Guardar imagen"
+                styleClass="btn-primario"
+                onAction="#guardarImagen"/>
+
+        <Button text="Copiar imagen"
+                styleClass="btn-secundario"
+                onAction="#copiarImagen"/>
+
+        <Button text="Cerrar"
+                styleClass="btn-cerrar"
+                onAction="#cerrar"/>
+    </HBox>
+
+    <Label fx:id="lblEstado" styleClass="estado" minHeight="18"/>
+
+</VBox>

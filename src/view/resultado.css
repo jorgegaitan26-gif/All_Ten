@@ -1,0 +1,140 @@
+/* Solo la paleta de All Ten:
+   verde #97C459 | crema #F1EFE8 | azul #7EB6E8 | naranja #F5A623 | blanco #FFFFFF */
+
+/* Fondo de la ventana: azul */
+.resultado-root {
+    -fx-background-color: #F1EFE8;
+}
+
+/* ============ TARJETA (crema) ============ */
+
+.tarjeta-resultado {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 32;
+    -fx-padding: 24 24 20 24;
+}
+
+.marca {
+    -fx-background-color: #F5A623;
+    -fx-background-radius: 20;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 20 5 20;
+}
+
+.titulo-reto {
+    -fx-text-fill: #F5A623;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* Panel azul que destaca el tiempo */
+.panel-tiempo {
+    -fx-background-color: #7EB6E8;
+    -fx-background-radius: 22;
+    -fx-padding: 8 36 10 36;
+}
+
+.etiqueta-tiempo {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.tiempo-grande {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 60px;
+    -fx-font-weight: bold;
+}
+
+.badge-velocidad {
+    -fx-background-color: #97C459;
+    -fx-background-radius: 20;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 20 5 20;
+}
+
+/* Los 10 números conseguidos (una sola fila) */
+.bola-numero {
+    -fx-background-color: #97C459;
+    -fx-background-radius: 50;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-alignment: CENTER;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.jugador-nombre {
+    -fx-text-fill: #F5A623;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.fecha {
+    -fx-text-fill: #F5A623;
+    -fx-font-size: 12px;
+}
+
+.caja-operaciones {
+    -fx-background-color: #7EB6E8;
+    -fx-background-radius: 14;
+    -fx-padding: 8 14 10 14;
+}
+
+.etiqueta-operaciones {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.texto-operaciones {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: "Consolas", "Monospaced";
+    -fx-font-size: 13px;
+    -fx-text-alignment: CENTER;
+}
+
+.pie-tarjeta {
+    -fx-background-color: #F5A623;
+    -fx-background-radius: 20;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 22 6 22;
+}
+
+/* ============ BOTONES (fuera de la tarjeta) ============ */
+
+.btn-primario,
+.btn-secundario,
+.btn-cerrar {
+    -fx-background-radius: 20;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.btn-primario,
+.btn-secundario,
+.btn-cerrar {
+    -fx-background-color: #97C459;
+    -fx-text-fill: #FFFFFF;
+}
+
+.estado {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
