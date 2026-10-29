@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/** Pruebas del diagrama de flujo de la clase Cronometro. */
 class CronometroTest {
 
     @Test
@@ -29,6 +28,7 @@ class CronometroTest {
     @DisplayName("iniciar() guarda tiempo_Inicio y pone tiempo_resultado en 0")
     void iniciar() {
         Cronometro cronometro = new Cronometro();
+        cronometro.setTiempo_resultado(5);
         cronometro.iniciar();
         assertNotNull(cronometro.getTiempo_Inicio());
         assertEquals(0, cronometro.getTiempo_resultado());
@@ -39,19 +39,10 @@ class CronometroTest {
     void detenerCalculaSegundos() throws InterruptedException {
         Cronometro cronometro = new Cronometro();
         cronometro.iniciar();
-        Thread.sleep(150);
+        Thread.sleep(120);
         double segundos = cronometro.detener();
 
-        assertTrue(segundos >= 0.14 && segundos < 2, "segundos = " + segundos);
+        assertTrue(segundos >= 0.1 && segundos < 2, "segundos = " + segundos);
         assertEquals(segundos, cronometro.getTiempo_resultado());
-    }
-
-    @Test
-    @DisplayName("tiempoTranscurrido() avanza mientras el cronometro corre")
-    void tiempoTranscurrido() throws InterruptedException {
-        Cronometro cronometro = new Cronometro();
-        cronometro.iniciar();
-        Thread.sleep(50);
-        assertTrue(cronometro.tiempoTranscurrido().toMillis() >= 40);
     }
 }

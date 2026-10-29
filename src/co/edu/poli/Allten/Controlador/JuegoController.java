@@ -81,7 +81,8 @@ public class JuegoController {
 
     /**
      * Llamado por {@link MainSceneController} justo despues de cargar el
-     * FXML de esta pantalla. Crea al Jugador y la Partida, las inicia, y
+     * FXML de esta pantalla. Crea al Jugador y su Partida, genera los
+     * numeros, arranca el cronometro y
      * construye los controles dinamicos (fila de objetivos, operadores y
      * numeros) y el reloj visible.
      *
@@ -90,9 +91,10 @@ public class JuegoController {
     public void iniciarPartida(String nickname) {
 
         jugador = new Jugador(nickname);
-        partida = new Partida();
-        partida.iniciarPartida();
-        intentoActual = partida.crearNuevoIntento();
+        partida = new Partida(jugador);
+        partida.generarNumerosValidos();
+        partida.getCronometro().iniciar();
+        intentoActual = new Expresion(partida);
 
         construirFilaObjetivos();
         construirFilaOperadores();
@@ -157,9 +159,7 @@ public class JuegoController {
 
     /**
      * Crea los 4 botones de numeros de la partida actual, en el mismo
-     * orden que {@code Partida.getNumerosDisponibles()}, para que el
-     * indice de cada boton coincida con el indice usado por
-     * {@link Expresion#isNumeroUsado(int)}.
+     * orden que {@code Partida.getNumerosDisponibles()}.
      */
     private void reconstruirFilaNumeros() {
 
@@ -186,14 +186,14 @@ public class JuegoController {
 
     /**
      * Se llama cuando el jugador toca un tile de numero. Intenta agregar
-     * ese digito a la expresion actual (ver {@link Expresion#concatenarDigitos(String)})
+     * ese digito a la expresion actual (ver {@link Expresion#concatenarDigitos(int)})
      * y refresca la vista.
      *
      * @param valor valor numerico mostrado en el tile presionado
      */
     private void onDigito(int valor) {
 
-        boolean agregado = intentoActual.concatenarDigitos(String.valueOf(valor));
+        boolean agregado = intentoActual.concatenarDigitos(valor);
 
         if (!agregado) {
             mostrarMensaje("Ese número ya no está disponible en esta posición.");
@@ -251,7 +251,7 @@ public class JuegoController {
     /** Boton "Limpiar intento": descarta la expresion actual y comienza una vacia con los mismos 4 numeros. */
     @FXML
     private void limpiarIntento() {
-        intentoActual = partida.crearNuevoIntento();
+        intentoActual = new Expresion(partida);
         mostrarMensaje("");
         refrescarVista();
     }
@@ -278,7 +278,7 @@ public class JuegoController {
                 break;
 
             case DIVISION_POR_CERO:
-                mostrarMensaje("Esa expresión hace una división por cero.");
+                mostrarMensaje("Esa expresión no se puede calcular (por ejemplo, una división por cero).");
                 break;
 
             case NO_COINCIDE_OBJETIVO:
@@ -305,7 +305,7 @@ public class JuegoController {
         // la siga editando (o la borre manualmente).
         if (resultado != ResultadoIntento.EXPRESION_INCOMPLETA
                 && resultado != ResultadoIntento.NUMEROS_INCOMPLETOS) {
-            intentoActual = partida.crearNuevoIntento();
+            intentoActual = new Expresion(partida);
         }
 
         refrescarVista();
@@ -324,34 +324,32 @@ public class JuegoController {
             return ResultadoIntento.EXPRESION_INCOMPLETA;
         }
 
-        if (!intentoActual.validarUsoDeNumeros()) {
+        int digitosUsados = intentoActual.getElementosExpresion().replaceAll("[^0-9]", "").length();
+        if (digitosUsados < partida.getNumerosDisponibles().size()) {
             return ResultadoIntento.NUMEROS_INCOMPLETOS;
         }
 
-        if (!intentoActual.validarDivisionCero()) {
+        if (!intentoActual.validarExpresion()) {
+            return ResultadoIntento.NO_COINCIDE_OBJETIVO;
+        }
+
+        double valor = intentoActual.calcularResultado();
+        if (Double.isNaN(valor)) {
             return ResultadoIntento.DIVISION_POR_CERO;
         }
 
-        if (!intentoActual.validarReglasOperaciones() || !intentoActual.validarNumerosPermitidos()) {
+        double redondeado = Math.rint(valor);
+        if (Math.abs(valor - redondeado) > 1e-9 || redondeado < 1 || redondeado > 10) {
             return ResultadoIntento.NO_COINCIDE_OBJETIVO;
         }
 
-        intentoActual.calcularResultado();
-
-        if (!intentoActual.comprobarCoincidenciaObjetivo()) {
-            return ResultadoIntento.NO_COINCIDE_OBJETIVO;
-        }
-
-        int objetivo = (int) Math.rint(intentoActual.getResultado());
-
-        if (partida.getObjetivosCompletados().contains(objetivo)) {
+        if (partida.getOperacionesRealizadas().contains(String.valueOf((int) redondeado))) {
             return ResultadoIntento.OBJETIVO_YA_LOGRADO;
         }
 
-        partida.completarObjetivo(objetivo, intentoActual.getTextoFormateado());
+        partida.completarObjetivo(valor);
 
         if (partida.comprobarObjetivosCompletados()) {
-            partida.finalizarTiempo();
             return ResultadoIntento.PARTIDA_GANADA;
         }
 
@@ -369,24 +367,38 @@ public class JuegoController {
      */
     private void refrescarVista() {
 
-        String texto = intentoActual.getTextoFormateado();
+        String texto = intentoActual.getElementosExpresion();
         lblExpresion.setText(texto.isEmpty() ? "Toca un número para empezar" : texto);
 
+        // Cuantas veces se ha usado cada digito en la expresion actual.
+        int[] usados = new int[10];
+        for (char caracter : texto.toCharArray()) {
+            if (Character.isDigit(caracter)) {
+                usados[caracter - '0']++;
+            }
+        }
+
+        List<Integer> numeros = partida.getNumerosDisponibles();
         for (int i = 0; i < botonesNumero.size(); i++) {
-            botonesNumero.get(i).setDisable(intentoActual.isNumeroUsado(i));
+            int valor = numeros.get(i);
+            boolean usado = usados[valor] > 0;
+            if (usado) {
+                usados[valor]--;
+            }
+            botonesNumero.get(i).setDisable(usado);
         }
     }
 
-    /** Colorea en verde la etiqueta del ultimo objetivo agregado a {@code Partida.getObjetivosCompletados()}. */
+    /** Colorea en verde la etiqueta del ultimo objetivo agregado a {@code Partida.getOperacionesRealizadas()}. */
     private void marcarUltimoObjetivoLogrado() {
 
-        List<Integer> logrados = partida.getObjetivosCompletados();
+        List<String> logrados = partida.getOperacionesRealizadas();
 
         if (logrados.isEmpty()) {
             return;
         }
 
-        int ultimo = logrados.get(logrados.size() - 1);
+        int ultimo = Integer.parseInt(logrados.get(logrados.size() - 1));
         Label etiqueta = etiquetasObjetivo.get(ultimo);
 
         if (etiqueta != null) {
@@ -423,17 +435,19 @@ public class JuegoController {
 
     /** Refresca el texto de {@link #lblTiempo} con el tiempo transcurrido del {@link co.edu.poli.Allten.Modelo.Cronometro}. */
     private void actualizarTiempoEnPantalla() {
-        lblTiempo.setText(formatearDuracion(partida.getCronometro().tiempoTranscurrido()));
+        Long inicio = partida.getCronometro().getTiempo_Inicio();
+        double segundos = inicio == null ? 0 : (System.nanoTime() - inicio) / 1_000_000_000.0;
+        lblTiempo.setText(formatearDuracion(segundos));
     }
 
     /**
-     * Formatea una duracion como "mm:ss" para mostrarla en pantalla.
+     * Formatea un tiempo en segundos como "mm:ss" para mostrarlo en pantalla.
      *
-     * @param duracion duracion a formatear
+     * @param segundosTotales tiempo en segundos
      * @return el texto formateado, por ejemplo "02:07"
      */
-    private String formatearDuracion(java.time.Duration duracion) {
-        long totalSegundos = Math.max(0, duracion.getSeconds());
+    private String formatearDuracion(double segundosTotales) {
+        long totalSegundos = Math.max(0, (long) segundosTotales);
         long minutos = totalSegundos / 60;
         long segundos = totalSegundos % 60;
         return String.format("%02d:%02d", minutos, segundos);
@@ -467,8 +481,10 @@ public class JuegoController {
     private void jugarOtraVez() {
 
         ocultarPanelVictoria();
-        partida.reiniciarPartida();
-        intentoActual = partida.crearNuevoIntento();
+        partida = new Partida(jugador);
+        partida.generarNumerosValidos();
+        partida.getCronometro().iniciar();
+        intentoActual = new Expresion(partida);
 
         reconstruirFilaNumeros();
         construirFilaObjetivos();

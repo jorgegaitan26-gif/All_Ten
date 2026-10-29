@@ -10,136 +10,66 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
 import javax.imageio.ImageIO;
 
 /**
- * Representa una partida de All Ten: los 4 numeros disponibles, los
- * objetivos (numeros del 1 al 10) que se han logrado, las expresiones que
- * los lograron, el tiempo total jugado y la fecha en que se termino.
+ * Representa una partida de All Ten. El Jugador hace parte de la partida
+ * y la partida se compone de un Cronometro (1 - 1) y de sus Expresiones
+ * (1 - 0..*).
  *
- * Implementa los diagramas de flujo de la clase Partida:
- * <ul>
- *   <li>Tarea 2: ciclo de la partida ({@link #setDificultad},
- *       {@link #generarNumerosValidos()}, {@link #completarObjetivo},
- *       {@link #comprobarObjetivosCompletados()}).</li>
- *   <li>Tarea 3: {@link #posiblesSoluciones()} y {@link #exportarResultados()}.</li>
- * </ul>
+ * Metodos del diagrama: {@link #generarNumerosValidos()},
+ * {@link #completarObjetivo(double)}, {@link #comprobarObjetivosCompletados()},
+ * {@link #posiblesSoluciones()}, {@link #exportarResultados()} y
+ * {@link #setDificultad(String)}.
+ *
+ * Niveles de dificultad: "FACIL" (+ - × ÷), "MEDIO" (+ potencia) y
+ * "DIFICIL" (+ raiz cuadrada).
  */
 public class Partida {
 
-    /**
-     * Niveles de dificultad de la partida y los operadores que permite cada uno
-     * (las potencias y raices solo se permiten en los niveles avanzados).
-     */
-    public enum NivelDificultad {
-
-        /** Suma, resta, multiplicacion y division. */
-        FACIL(Set.of(Expresion.SUMA, Expresion.RESTA, Expresion.MULTIPLICACION, Expresion.DIVISION)),
-
-        /** Lo de FACIL mas potencias. */
-        MEDIO(Set.of(Expresion.SUMA, Expresion.RESTA, Expresion.MULTIPLICACION, Expresion.DIVISION,
-                Expresion.POTENCIA)),
-
-        /** Lo de MEDIO mas raices cuadradas. */
-        DIFICIL(Set.of(Expresion.SUMA, Expresion.RESTA, Expresion.MULTIPLICACION, Expresion.DIVISION,
-                Expresion.POTENCIA, Expresion.RAIZ));
-
-        private final Set<String> operadoresPermitidos;
-
-        NivelDificultad(Set<String> operadoresPermitidos) {
-            this.operadoresPermitidos = operadoresPermitidos;
-        }
-
-        /**
-         * Indica si el nivel permite un operador.
-         *
-         * @param operador simbolo del operador (ver constantes de {@link Expresion})
-         * @return true si el operador se puede usar en este nivel
-         */
-        public boolean permite(String operador) {
-            return operadoresPermitidos.contains(operador);
-        }
-
-        /** Da acceso a los operadores del nivel.
-         * @return los operadores permitidos en este nivel */
-        public Set<String> getOperadoresPermitidos() {
-            return operadoresPermitidos;
-        }
-    }
-
-    private static final int CANTIDAD_NUMEROS = 4;
-    private static final int OBJETIVO_MINIMO = 1;
-    private static final int OBJETIVO_MAXIMO = 10;
-    private static final double TOLERANCIA = 1e-9;
-
-    /** Carpeta por defecto donde {@link #exportarResultados()} guarda la imagen. */
-    private static final String CARPETA_EXPORTACION = "resultados";
-
-    // ----- Atributos del diagrama de clases -----
-    private List<Integer> numerosDisponibles;
-    private List<Integer> objetivosCompletados;
-    private List<String> operacionesRealizadas;
-    private double tiempoTotal;
-    private LocalDateTime fechaFinalizacion;
-    private NivelDificultad nivelDificultad;
-
-    /** Jugador dueno de la partida (Partida.Jugador_id_Jugador; relacion jugador 1 - 0..* partida). */
-    private Jugador jugador;
-
-    /** Identificador de la partida en la base de datos (id_Partida); {@code null} mientras no se ha guardado. */
+    /** Identificador de la partida en la base de datos; {@code null} mientras no se ha guardado. */
     private Integer idPartida;
 
-    // ----- Composicion (partida 1 - 1 cronometro / partida 1 - 0..* expresion) -----
-    private final Cronometro cronometro;
-    private final List<Expresion> historialExpresiones;
-
-    private final Random aleatorio;
-
-    /** Crea una partida vacia (sin numeros ni objetivos), en dificultad FACIL; llamar a {@link #iniciarPartida()} para comenzarla. */
-    public Partida() {
-        this(null);
-    }
+    private List<Integer> numerosDisponibles;
+    private List<String> operacionesRealizadas;
+    private double tiempoTotal;
+    private Date fechaFinalizacion;
+    private String nivelDificultad;
+    private Jugador jugador;
+    private Cronometro cronometro;
 
     /**
-     * Crea una partida vacia vinculada a un jugador.
+     * Crea una partida nueva del jugador, en dificultad FACIL y sin numeros
+     * todavia (se generan con {@link #generarNumerosValidos()}).
      *
-     * @param jugador jugador dueno de la partida
+     * @param jugador jugador que hace parte de la partida
      */
     public Partida(Jugador jugador) {
         this.jugador = jugador;
         this.numerosDisponibles = new ArrayList<>();
-        this.objetivosCompletados = new ArrayList<>();
         this.operacionesRealizadas = new ArrayList<>();
         this.tiempoTotal = 0;
         this.fechaFinalizacion = null;
-        this.nivelDificultad = NivelDificultad.FACIL;
+        this.nivelDificultad = "FACIL";
         this.cronometro = new Cronometro();
-        this.historialExpresiones = new ArrayList<>();
-        this.aleatorio = new Random();
     }
 
     /**
-     * Reconstruye una partida ya terminada a partir de un registro de la
-     * base de datos (lo usa {@code PartidaDAOImpl.obtenerHistorialPartidas()}).
+     * Reconstruye una partida guardada en la base de datos.
      *
-     * @param idPartida             id_Partida del registro
-     * @param jugador               jugador dueno de la partida
+     * @param idPartida             identificador de la partida
+     * @param jugador               jugador de la partida
      * @param tiempoTotal           tiempo total en segundos
-     * @param operacionesRealizadas texto "objetivo = expresion" de cada objetivo logrado
-     * @param fechaFinalizacion     fecha en que se termino la partida
+     * @param operacionesRealizadas objetivos logrados
+     * @param fechaFinalizacion     fecha y hora en que termino
      */
     public Partida(Integer idPartida, Jugador jugador, double tiempoTotal,
-                   List<String> operacionesRealizadas, LocalDateTime fechaFinalizacion) {
+                   List<String> operacionesRealizadas, Date fechaFinalizacion) {
         this(jugador);
         this.idPartida = idPartida;
         this.tiempoTotal = tiempoTotal;
@@ -149,414 +79,216 @@ public class Partida {
         }
     }
 
-    // =====================================================================
-    // TAREA 2: CICLO DE LA PARTIDA
-    // =====================================================================
-
     /**
-     * [B] Establece el nivel de dificultad (debe hacerse antes de
-     * {@link #iniciarPartida()}, porque define los numeros que se generan).
+     * Genera 4 numeros (del 1 al 9) con los que se pueden lograr los 10
+     * objetivos segun la dificultad: sortea numeros hasta que
+     * {@link #posiblesSoluciones()} encuentra solucion para los 10.
      *
-     * @param nivelDificultad nuevo nivel de la partida
+     * @return los 4 numeros generados (quedan en numerosDisponibles)
      */
-    public void setDificultad(NivelDificultad nivelDificultad) {
-        this.nivelDificultad = nivelDificultad == null ? NivelDificultad.FACIL : nivelDificultad;
-    }
-
-    /**
-     * Comienza la partida: genera los numeros validos y, una vez estan
-     * listos, arranca el cronometro.
-     */
-    public void iniciarPartida() {
-        // [A] Inicio: configurar partida (el nivel ya se fijo con setDificultad [B])
-        objetivosCompletados = new ArrayList<>();
-        operacionesRealizadas = new ArrayList<>();
-        historialExpresiones.clear();
-        tiempoTotal = 0;
-        fechaFinalizacion = null;
-
-        // [C] Generar 4 numeros validos
-        generarNumerosValidos();
-
-        // [D] Iniciar cronometro
-        cronometro.iniciar();
-
-        // [E] A partir de aqui el jugador ingresa expresiones (crearNuevoIntento)
-    }
-
-    /**
-     * Genera los 4 numeros (del 1 al 9) que permiten resolver los
-     * objetivos del 1 al 10 segun la dificultad: se sortean numeros hasta
-     * que {@link #posiblesSoluciones()} cubre los 10 objetivos.
-     */
-    public void generarNumerosValidos() {
-
-        List<Integer> candidatos;
+    public List<Integer> generarNumerosValidos() {
+        Random aleatorio = new Random();
         do {
-            candidatos = new ArrayList<>();
-            for (int i = 0; i < CANTIDAD_NUMEROS; i++) {
+            List<Integer> candidatos = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
                 candidatos.add(1 + aleatorio.nextInt(9));
             }
-        } while (calcularSoluciones(candidatos, nivelDificultad).size() < OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1);
+            this.numerosDisponibles = candidatos;
+        } while (posiblesSoluciones().size() < 10);
 
-        this.numerosDisponibles = candidatos;
+        return numerosDisponibles;
     }
 
     /**
-     * Registra el resultado y la expresion cuando se alcanza un objetivo.
+     * Registra un objetivo si el resultado es un entero del 1 al 10 que
+     * todavia no se habia logrado.
      *
-     * @param resultado valor entero (1 a 10) obtenido al calcular la expresion
-     * @param expresion texto de la expresion que produjo ese resultado
-     * @return true si el resultado coincidia con un objetivo pendiente y se registro
+     * @param resultado valor calculado por la expresion
+     * @return true si el objetivo se registro en operacionesRealizadas
      */
-    public boolean completarObjetivo(int resultado, String expresion) {
-
-        // [F] ¿El resultado coincide con un objetivo pendiente?
-        if (resultado < OBJETIVO_MINIMO || resultado > OBJETIVO_MAXIMO) {
-            return false;                                   // No -> vuelve a [E]
-        }
-        if (objetivosCompletados.contains(resultado)) {
-            return false;                                   // No -> vuelve a [E]
+    public boolean completarObjetivo(double resultado) {
+        double redondeado = Math.rint(resultado);
+        if (Double.isNaN(resultado) || Math.abs(resultado - redondeado) > 1e-9
+                || redondeado < 1 || redondeado > 10) {
+            return false;
         }
 
-        // [G] Registrar en objetivosCompletados y operacionesRealizadas
-        objetivosCompletados.add(resultado);
-        operacionesRealizadas.add(resultado + " = " + expresion);
+        String objetivo = String.valueOf((int) redondeado);
+        if (operacionesRealizadas.contains(objetivo)) {
+            return false;
+        }
 
-        // [H] ¿comprobarObjetivosCompletados = true? (si lo es, cierra la partida [I][J])
-        comprobarObjetivosCompletados();
+        operacionesRealizadas.add(objetivo);
         return true;
     }
 
     /**
-     * Version que recibe directamente el double que retorna
-     * {@code Expresion.calcularResultado()}.
+     * Revisa si ya se lograron los 10 objetivos. La primera vez que se
+     * cumple detiene el cronometro, guarda el tiempoTotal y la
+     * fechaFinalizacion.
      *
-     * @param resultado valor calculado por la expresion
-     * @param expresion texto de la expresion que produjo ese resultado
-     * @return true si el resultado es un entero que coincidia con un objetivo pendiente
-     */
-    public boolean completarObjetivo(double resultado, String expresion) {
-        double redondeado = Math.rint(resultado);
-        if (Double.isNaN(resultado) || Math.abs(resultado - redondeado) > TOLERANCIA) {
-            return false;
-        }
-        return completarObjetivo((int) redondeado, expresion);
-    }
-
-    /**
-     * Evalua si ya se consiguieron los 10 objetivos. Si es asi, detiene el
-     * cronometro, guarda el tiempoTotal y registra la fechaFinalizacion.
-     *
-     * @return true si ya se completaron los 10 objetivos (1 al 10)
+     * @return true si ya se completaron los 10 objetivos
      */
     public boolean comprobarObjetivosCompletados() {
+        boolean completados = operacionesRealizadas.size() >= 10;
 
-        boolean completados = objetivosCompletados.size() >= (OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1);
-
-        if (completados) {
-            finalizarTiempo();                              // [I] y [J]
+        if (completados && fechaFinalizacion == null) {
+            this.tiempoTotal = cronometro.detener();
+            this.fechaFinalizacion = new Date();
         }
-        return completados;                                 // [K] Partida finalizada con exito
+        return completados;
     }
 
     /**
-     * [I] Detiene el cronometro y guarda el tiempoTotal; [J] registra la
-     * fechaFinalizacion. Si la partida ya estaba finalizada no hace nada,
-     * para no alterar el tiempo ya registrado.
-     */
-    public void finalizarTiempo() {
-        if (fechaFinalizacion != null) {
-            return;
-        }
-        this.tiempoTotal = cronometro.detener();
-        this.fechaFinalizacion = LocalDateTime.now();
-    }
-
-    /** Reinicia la partida: nuevos numeros, objetivos vacios, cronometro en cero. */
-    public void reiniciarPartida() {
-        iniciarPartida();
-    }
-
-    /**
-     * Crea una nueva Expresion (un nuevo intento) ligada a los numeros y a
-     * la dificultad de esta partida y la agrega al historial de intentos.
+     * Busca, con los 4 numeros y los operadores de la dificultad, una
+     * expresion para cada objetivo del 1 al 10. Prueba todos los ordenes de
+     * los numeros, todas las combinaciones de operadores y las 5 formas de
+     * agruparlos con parentesis.
      *
-     * @return la Expresion recien creada, vacia
-     */
-    public Expresion crearNuevoIntento() {
-        Expresion expresion = new Expresion(numerosDisponibles, nivelDificultad);
-        historialExpresiones.add(expresion);
-        return expresion;
-    }
-
-    // =====================================================================
-    // TAREA 3: posiblesSoluciones
-    // =====================================================================
-
-    /**
-     * Calcula, con los 4 numeros de la partida y los operadores permitidos
-     * por la dificultad, una expresion para cada objetivo del 1 al 10.
-     *
-     * @return una lista "objetivo = expresion" ordenada del 1 al 10 (solo los objetivos que tienen solucion)
+     * @return lista "objetivo = expresion" del 1 al 10 (solo los que tienen solucion)
      */
     public List<String> posiblesSoluciones() {
-        // [PS1] Inicio: solicitar posibles soluciones
-        // [PS2] Recuperar numerosDisponibles y nivelDificultad
-        Map<Integer, String> soluciones = calcularSoluciones(numerosDisponibles, nivelDificultad);
 
-        // [PS7] Retornar List<String> con soluciones al controlador
         List<String> lista = new ArrayList<>();
-        for (Map.Entry<Integer, String> solucion : soluciones.entrySet()) {
-            lista.add(solucion.getKey() + " = " + solucion.getValue());
-        }
-        return lista;                                       // [PS8] Fin
-    }
-
-    /**
-     * Busca una expresion por objetivo usando los 4 numeros y los
-     * operadores del nivel.
-     */
-    private Map<Integer, String> calcularSoluciones(List<Integer> numeros, NivelDificultad nivel) {
-
-        Map<Integer, String> soluciones = new TreeMap<>();
-        if (numeros.size() != CANTIDAD_NUMEROS) {
-            return soluciones;
+        if (numerosDisponibles == null || numerosDisponibles.size() != 4) {
+            return lista;
         }
 
-        // Hojas: cada numero (y, si el nivel permite raices, tambien su raiz).
-        int combinacionesDeHojas = nivel.permite(Expresion.RAIZ) ? (1 << numeros.size()) : 1;
+        List<String> operadores = new ArrayList<>(List.of(
+                Expresion.SUMA, Expresion.RESTA, Expresion.MULTIPLICACION, Expresion.DIVISION));
+        if (!"FACIL".equals(nivelDificultad)) {
+            operadores.add(Expresion.POTENCIA);
+        }
+        int combinacionesRaiz = "DIFICIL".equals(nivelDificultad) ? 16 : 1;
+        int k = operadores.size();
 
-        for (int mascara = 0; mascara < combinacionesDeHojas; mascara++) {
+        // Las 5 formas de agrupar 4 numeros, en notacion posfija (N = numero, O = operador).
+        String[] formas = {"NNONONO", "NNONNOO", "NNNOONO", "NNNONOO", "NNNNOOO"};
 
-            List<Nodo> hojas = new ArrayList<>();
-            for (int i = 0; i < numeros.size(); i++) {
-                int numero = numeros.get(i);
-                if ((mascara & (1 << i)) != 0) {
-                    hojas.add(new Nodo(Math.sqrt(numero), Expresion.RAIZ + " " + numero));
-                } else {
-                    hojas.add(new Nodo(numero, String.valueOf(numero)));
+        String[] soluciones = new String[11];
+        int encontradas = 0;
+
+        busqueda:
+        for (int a = 0; a < 4; a++) {
+            for (int b = 0; b < 4; b++) {
+                for (int c = 0; c < 4; c++) {
+                    for (int d = 0; d < 4; d++) {
+                        if (a == b || a == c || a == d || b == c || b == d || c == d) {
+                            continue;
+                        }
+                        int[] orden = {a, b, c, d};
+
+                        for (int mascara = 0; mascara < combinacionesRaiz; mascara++) {
+                            for (int o = 0; o < k * k * k; o++) {
+                                String[] ops = {operadores.get(o % k), operadores.get(o / k % k),
+                                        operadores.get(o / (k * k))};
+
+                                for (String forma : formas) {
+
+                                    double[] valores = new double[4];
+                                    String[] textos = new String[4];
+                                    int tope = 0;
+                                    int siguienteNumero = 0;
+                                    int siguienteOperador = 0;
+                                    boolean valido = true;
+
+                                    for (char simbolo : forma.toCharArray()) {
+                                        if (simbolo == 'N') {
+                                            int indice = orden[siguienteNumero++];
+                                            int numero = numerosDisponibles.get(indice);
+                                            if ((mascara & (1 << indice)) != 0) {
+                                                valores[tope] = Math.sqrt(numero);
+                                                textos[tope] = Expresion.RAIZ + " " + numero;
+                                            } else {
+                                                valores[tope] = numero;
+                                                textos[tope] = String.valueOf(numero);
+                                            }
+                                            tope++;
+                                        } else {
+                                            String op = ops[siguienteOperador++];
+                                            double y = valores[--tope];
+                                            String textoY = textos[tope];
+                                            double x = valores[--tope];
+                                            String textoX = textos[tope];
+                                            double r;
+
+                                            if (Expresion.SUMA.equals(op)) {
+                                                r = x + y;
+                                            } else if (Expresion.RESTA.equals(op)) {
+                                                r = x - y;
+                                            } else if (Expresion.MULTIPLICACION.equals(op)) {
+                                                r = x * y;
+                                            } else if (Expresion.DIVISION.equals(op)) {
+                                                r = Math.abs(y) < 1e-9 ? Double.NaN : x / y;
+                                            } else {
+                                                double exponente = Math.rint(y);
+                                                r = (Math.abs(y - exponente) > 1e-9 || exponente < 0 || exponente > 5)
+                                                        ? Double.NaN
+                                                        : Math.pow(x, exponente);
+                                            }
+
+                                            if (Double.isNaN(r) || Double.isInfinite(r)) {
+                                                valido = false;
+                                                break;
+                                            }
+                                            valores[tope] = r;
+                                            textos[tope] = "( " + textoX + " " + op + " " + textoY + " )";
+                                            tope++;
+                                        }
+                                    }
+
+                                    if (!valido) {
+                                        continue;
+                                    }
+
+                                    double redondeado = Math.rint(valores[0]);
+                                    int objetivo = (int) redondeado;
+                                    if (Math.abs(valores[0] - redondeado) < 1e-9
+                                            && objetivo >= 1 && objetivo <= 10 && soluciones[objetivo] == null) {
+                                        // Se quitan los parentesis exteriores
+                                        soluciones[objetivo] = textos[0].substring(2, textos[0].length() - 2);
+                                        encontradas++;
+                                        if (encontradas == 10) {
+                                            break busqueda;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        }
 
-            // [PS3] Evaluar combinaciones matematicas para objetivos 1 al 10
-            if (buscarCombinaciones(hojas, numeros, nivel, soluciones)) {
-                break;                                      // [PS6] Si: se cubrieron los 10
+        for (int objetivo = 1; objetivo <= 10; objetivo++) {
+            if (soluciones[objetivo] != null) {
+                lista.add(objetivo + " = " + soluciones[objetivo]);
             }
         }
-        return soluciones;
+        return lista;
     }
 
     /**
-     * Combina recursivamente pares de nodos con cada operador permitido
-     * (esto cubre todas las formas de agrupar con parentesis).
+     * Genera una imagen PNG con el resumen de la partida (jugador, tiempo,
+     * fecha y objetivos logrados) en la carpeta "resultados".
      *
-     * @return true cuando ya se cubrieron los 10 objetivos
-     */
-    private boolean buscarCombinaciones(List<Nodo> nodos, List<Integer> numeros,
-                                        NivelDificultad nivel, Map<Integer, String> soluciones) {
-
-        if (nodos.size() == 1) {
-            registrarSiEsObjetivo(nodos.get(0), numeros, nivel, soluciones);
-            // [PS6] ¿Se cubrieron los objetivos 1 al 10?
-            return soluciones.size() == OBJETIVO_MAXIMO - OBJETIVO_MINIMO + 1;
-        }
-
-        for (int i = 0; i < nodos.size(); i++) {
-            for (int j = 0; j < nodos.size(); j++) {
-
-                if (i == j) {
-                    continue;
-                }
-
-                List<Nodo> resto = new ArrayList<>();
-                for (int k = 0; k < nodos.size(); k++) {
-                    if (k != i && k != j) {
-                        resto.add(nodos.get(k));
-                    }
-                }
-
-                for (String operador : List.of(Expresion.SUMA, Expresion.RESTA, Expresion.MULTIPLICACION,
-                        Expresion.DIVISION, Expresion.POTENCIA)) {
-
-                    if (!nivel.permite(operador)) {
-                        continue;
-                    }
-                    // Suma y multiplicacion son conmutativas: basta un orden.
-                    boolean conmutativo = Expresion.SUMA.equals(operador) || Expresion.MULTIPLICACION.equals(operador);
-                    if (conmutativo && i > j) {
-                        continue;
-                    }
-
-                    Nodo combinado = combinar(nodos.get(i), operador, nodos.get(j));
-                    if (combinado == null) {
-                        continue;
-                    }
-
-                    resto.add(combinado);
-                    if (buscarCombinaciones(resto, numeros, nivel, soluciones)) {
-                        return true;
-                    }
-                    resto.remove(resto.size() - 1);
-                }
-            }
-        }
-        return false;
-    }
-
-    private Nodo combinar(Nodo a, String operador, Nodo b) {
-
-        double valor;
-        switch (operador) {
-            case Expresion.SUMA:
-                valor = a.valor + b.valor;
-                break;
-            case Expresion.RESTA:
-                valor = a.valor - b.valor;
-                break;
-            case Expresion.MULTIPLICACION:
-                valor = a.valor * b.valor;
-                break;
-            case Expresion.DIVISION:
-                if (Math.abs(b.valor) < TOLERANCIA) {
-                    return null;
-                }
-                valor = a.valor / b.valor;
-                break;
-            case Expresion.POTENCIA:
-                // Exponentes enteros pequenos para mantener los valores manejables.
-                double exponente = Math.rint(b.valor);
-                if (Math.abs(b.valor - exponente) > TOLERANCIA || exponente < 0 || exponente > 5) {
-                    return null;
-                }
-                valor = Math.pow(a.valor, exponente);
-                break;
-            default:
-                return null;
-        }
-
-        if (Double.isNaN(valor) || Double.isInfinite(valor) || Math.abs(valor) > 1_000_000) {
-            return null;
-        }
-        return new Nodo(valor, "( " + a.texto + " " + operador + " " + b.texto + " )");
-    }
-
-    /**
-     * [PS4] Si el valor es un objetivo pendiente, comprueba con una
-     * {@link Expresion} real que la expresion es valida segun la
-     * dificultad y, si lo es, [PS5] la agrega a la lista de soluciones.
-     */
-    private void registrarSiEsObjetivo(Nodo nodo, List<Integer> numeros,
-                                       NivelDificultad nivel, Map<Integer, String> soluciones) {
-
-        double redondeado = Math.rint(nodo.valor);
-        if (Math.abs(nodo.valor - redondeado) > TOLERANCIA) {
-            return;
-        }
-        int objetivo = (int) redondeado;
-        if (objetivo < OBJETIVO_MINIMO || objetivo > OBJETIVO_MAXIMO || soluciones.containsKey(objetivo)) {
-            return;
-        }
-
-        // Se quitan los parentesis exteriores que agrega la ultima combinacion.
-        String texto = nodo.texto;
-        if (texto.startsWith("( ") && texto.endsWith(" )")) {
-            texto = texto.substring(2, texto.length() - 2);
-        }
-
-        Expresion prueba = new Expresion(numeros, nivel);
-        for (String elemento : texto.split(" ")) {
-
-            boolean agregado;
-            if (elemento.matches("\\d")) {
-                agregado = prueba.concatenarDigitos(Integer.parseInt(elemento));
-            } else if (Expresion.PARENTESIS_ABRE.equals(elemento) || Expresion.PARENTESIS_CIERRA.equals(elemento)) {
-                agregado = prueba.agregarParentesis(elemento);
-            } else {
-                agregado = prueba.agregarOperacion(elemento);
-            }
-            if (!agregado) {
-                return;                                     // [PS4] No -> sigue buscando
-            }
-        }
-
-        if (prueba.validarExpresion()
-                && Math.abs(prueba.calcularResultado() - objetivo) < TOLERANCIA
-                && prueba.comprobarCoincidenciaObjetivo()) {
-            soluciones.put(objetivo, prueba.getTextoFormateado());
-        }
-    }
-
-    /** Valor parcial de la busqueda junto con el texto de la expresion que lo produce. */
-    private static final class Nodo {
-        final double valor;
-        final String texto;
-
-        Nodo(double valor, String texto) {
-            this.valor = valor;
-            this.texto = texto;
-        }
-    }
-
-    // =====================================================================
-    // TAREA 3: exportarResultados
-    // =====================================================================
-
-    /**
-     * Genera una imagen PNG con el resumen de la partida y la guarda en la
-     * carpeta "resultados" del directorio de trabajo.
-     *
-     * @return la ruta del archivo generado
      * @throws IOException si no se pudo escribir el archivo
      */
-    public Path exportarResultados() throws IOException {
-        return exportarResultados(Paths.get(CARPETA_EXPORTACION));
-    }
+    public void exportarResultados() throws IOException {
 
-    /**
-     * Genera una imagen PNG con el resumen de la partida (nickname,
-     * tiempoTotal, fechaFinalizacion y operacionesRealizadas) y la guarda
-     * en la carpeta indicada.
-     *
-     * @param carpeta carpeta donde se guarda la imagen (se crea si no existe)
-     * @return la ruta del archivo generado
-     * @throws IOException si no se pudo escribir el archivo
-     */
-    public Path exportarResultados(Path carpeta) throws IOException {
-
-        // [ER1] Inicio: solicitud de exportar resultados
-        // [ER2] Recopilar datos finales de la partida
         String nickname = jugador != null && jugador.getNickname() != null ? jugador.getNickname() : "Jugador";
-        String tiempo = formatearTiempo(tiempoTotal);
+        long minutos = (long) (tiempoTotal / 60);
+        String tiempo = String.format("%02d:%05.2f (%.2f s)", minutos, tiempoTotal - minutos * 60, tiempoTotal);
         String fecha = fechaFinalizacion != null
-                ? fechaFinalizacion.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(fechaFinalizacion)
                 : "Partida en curso";
-        List<String> operaciones = new ArrayList<>(operacionesRealizadas);
-
-        // [ER3] Generar representacion grafica de los resultados
-        BufferedImage imagen = dibujarResumen(nickname, tiempo, fecha, operaciones);
-
-        // [ER4] Guardar archivo exportado en el sistema de ficheros
-        Files.createDirectories(carpeta);
-        String sello = (fechaFinalizacion != null ? fechaFinalizacion : LocalDateTime.now())
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String nombreSeguro = nickname.replaceAll("[^A-Za-z0-9_-]", "_");
-        Path archivo = carpeta.resolve("AllTen_" + nombreSeguro + "_" + sello + ".png");
-        ImageIO.write(imagen, "png", archivo.toFile());
-
-        // [ER5] Fin: resultado exportado exitosamente
-        return archivo;
-    }
-
-    private BufferedImage dibujarResumen(String nickname, String tiempo, String fecha, List<String> operaciones) {
 
         int ancho = 720;
-        int alto = 300 + Math.max(1, operaciones.size()) * 34;
+        int alto = 300 + Math.max(1, operacionesRealizadas.size()) * 34;
 
         // Colores de la paleta Okabe-Ito usada en la interfaz.
         Color azul = new Color(0x00, 0x72, 0xB2);
         Color verde = new Color(0x00, 0x9E, 0x73);
-        Color texto = Color.BLACK;
 
         BufferedImage imagen = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = imagen.createGraphics();
@@ -565,14 +297,13 @@ public class Partida {
 
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, ancho, alto);
-
         g.setColor(azul);
         g.fillRect(0, 0, ancho, 80);
         g.setColor(Color.WHITE);
         g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
         g.drawString("All Ten - Resultados", 32, 52);
 
-        g.setColor(texto);
+        g.setColor(Color.BLACK);
         g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
         int y = 125;
         g.drawString("Jugador: " + nickname, 32, y);
@@ -589,118 +320,124 @@ public class Partida {
         g.drawLine(32, y, ancho - 32, y);
 
         y += 36;
+        g.setColor(Color.BLACK);
         g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
-        g.setColor(texto);
-        g.drawString("Operaciones realizadas (" + operaciones.size() + "/10)", 32, y);
+        g.drawString("Objetivos logrados (" + operacionesRealizadas.size() + "/10)", 32, y);
 
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 20));
-        if (operaciones.isEmpty()) {
+        if (operacionesRealizadas.isEmpty()) {
             y += 34;
             g.drawString("Sin objetivos logrados", 48, y);
         }
-        for (String operacion : operaciones) {
+        for (String operacion : operacionesRealizadas) {
             y += 34;
             g.setColor(verde);
             g.fillOval(36, y - 13, 10, 10);
-            g.setColor(texto);
+            g.setColor(Color.BLACK);
             g.drawString(operacion, 56, y);
         }
-
         g.dispose();
-        return imagen;
+
+        Path carpeta = Paths.get("resultados");
+        Files.createDirectories(carpeta);
+        String sello = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(fechaFinalizacion != null ? fechaFinalizacion : new Date());
+        String nombreSeguro = nickname.replaceAll("[^A-Za-z0-9_-]", "_");
+        ImageIO.write(imagen, "png", carpeta.resolve("AllTen_" + nombreSeguro + "_" + sello + ".png").toFile());
     }
 
-    private String formatearTiempo(double segundos) {
-        long minutos = (long) (segundos / 60);
-        double resto = segundos - minutos * 60;
-        return String.format("%02d:%05.2f (%.2f s)", minutos, resto, segundos);
+    /**
+     * Cambia el nivel de dificultad: "FACIL", "MEDIO" o "DIFICIL" (sin
+     * importar mayusculas ni tildes).
+     *
+     * @param nuevaDificultad nivel de dificultad
+     * @throws IllegalArgumentException si el nivel no es uno de los tres
+     */
+    public void setDificultad(String nuevaDificultad) {
+        String nivel = nuevaDificultad == null ? "" : nuevaDificultad.trim().toUpperCase()
+                .replace("Á", "A").replace("Í", "I");
+
+        if (!nivel.equals("FACIL") && !nivel.equals("MEDIO") && !nivel.equals("DIFICIL")) {
+            throw new IllegalArgumentException("Dificultad no valida: " + nuevaDificultad
+                    + ". Usa FACIL, MEDIO o DIFICIL.");
+        }
+        this.nivelDificultad = nivel;
     }
 
-    // =====================================================================
-    // ACCESO A LOS DATOS
-    // =====================================================================
+    // ----- Getters y setters -----
 
-    /** Da acceso a los numeros de la partida.
-     * @return los 4 numeros disponibles para esta partida (vista de solo lectura) */
-    public List<Integer> getNumerosDisponibles() {
-        return Collections.unmodifiableList(numerosDisponibles);
-    }
-
-    /** Da acceso a los objetivos logrados.
-     * @return los objetivos (1 a 10) logrados hasta el momento, en el orden en que se lograron */
-    public List<Integer> getObjetivosCompletados() {
-        return Collections.unmodifiableList(objetivosCompletados);
-    }
-
-    /** Da acceso a las expresiones ganadoras.
-     * @return el texto "objetivo = expresion" de cada objetivo logrado, en el mismo orden que {@link #getObjetivosCompletados()} */
-    public List<String> getOperacionesRealizadas() {
-        return Collections.unmodifiableList(operacionesRealizadas);
-    }
-
-    /** Da acceso al tiempo total jugado, como Duration (lo usa la vista para mostrar "mm:ss").
-     * @return el tiempo total, disponible una vez finalizada la partida */
-    public Duration getTiempoTotal() {
-        return Duration.ofNanos(Math.round(tiempoTotal * 1_000_000_000.0));
-    }
-
-    /** Da acceso al tiempo total jugado en segundos (valor que entrega {@code Cronometro.detener()}).
-     * @return el tiempo total en segundos, 0 si la partida no ha terminado */
-    public double getTiempoTotalSegundos() {
-        return tiempoTotal;
-    }
-
-    /** Da acceso a la fecha de finalizacion.
-     * @return la fecha y hora en que se completaron los 10 objetivos, o {@code null} si la partida sigue en curso */
-    public LocalDateTime getFechaFinalizacion() {
-        return fechaFinalizacion;
-    }
-
-    /** Da acceso a la dificultad.
-     * @return el nivel de dificultad de la partida */
-    public NivelDificultad getNivelDificultad() {
-        return nivelDificultad;
-    }
-
-    /** Da acceso al identificador de la partida en la base de datos.
-     * @return el id_Partida, o {@code null} si todavia no se ha guardado */
+    /** @return identificador de la partida, o {@code null} si no se ha guardado */
     public Integer getIdPartida() {
         return idPartida;
     }
 
-    /**
-     * Asigna el identificador generado por la base de datos al guardar la partida.
-     *
-     * @param idPartida id_Partida generado
-     */
+    /** @param idPartida identificador generado por la base de datos */
     public void setIdPartida(Integer idPartida) {
         this.idPartida = idPartida;
     }
 
-    /** Da acceso al jugador de la partida.
-     * @return el jugador dueno de la partida, o {@code null} si no se ha vinculado */
+    /** @return los 4 numeros de la partida */
+    public List<Integer> getNumerosDisponibles() {
+        return numerosDisponibles;
+    }
+
+    /** @param numerosDisponibles nuevos numeros de la partida */
+    public void setNumerosDisponibles(List<Integer> numerosDisponibles) {
+        this.numerosDisponibles = numerosDisponibles;
+    }
+
+    /** @return objetivos logrados, en el orden en que se lograron */
+    public List<String> getOperacionesRealizadas() {
+        return operacionesRealizadas;
+    }
+
+    /** @param operacionesRealizadas nuevos objetivos logrados */
+    public void setOperacionesRealizadas(List<String> operacionesRealizadas) {
+        this.operacionesRealizadas = operacionesRealizadas;
+    }
+
+    /** @return tiempo total en segundos (0 si la partida no ha terminado) */
+    public double getTiempoTotal() {
+        return tiempoTotal;
+    }
+
+    /** @param tiempoTotal nuevo tiempo total en segundos */
+    public void setTiempoTotal(double tiempoTotal) {
+        this.tiempoTotal = tiempoTotal;
+    }
+
+    /** @return fecha y hora de finalizacion, o {@code null} si sigue en curso */
+    public Date getFechaFinalizacion() {
+        return fechaFinalizacion;
+    }
+
+    /** @param fechaFinalizacion nueva fecha de finalizacion */
+    public void setFechaFinalizacion(Date fechaFinalizacion) {
+        this.fechaFinalizacion = fechaFinalizacion;
+    }
+
+    /** @return nivel de dificultad ("FACIL", "MEDIO" o "DIFICIL") */
+    public String getNivelDificultad() {
+        return nivelDificultad;
+    }
+
+    /** @return jugador de la partida */
     public Jugador getJugador() {
         return jugador;
     }
 
-    /**
-     * Vincula la partida con su jugador (llave foranea Jugador_id_Jugador).
-     *
-     * @param jugador jugador dueno de la partida
-     */
+    /** @param jugador jugador de la partida */
     public void setJugador(Jugador jugador) {
         this.jugador = jugador;
     }
 
-    /** Da acceso al cronometro de la partida.
-     * @return el cronometro asociado a esta partida (relacion partida 1 - 1 cronometro) */
+    /** @return cronometro de la partida */
     public Cronometro getCronometro() {
         return cronometro;
     }
 
-    /** Da acceso al historial de intentos.
-     * @return todos los intentos (Expresion) que se han creado en esta partida, ganadores o no */
-    public List<Expresion> getHistorialExpresiones() {
-        return Collections.unmodifiableList(historialExpresiones);
+    /** @param cronometro cronometro de la partida */
+    public void setCronometro(Cronometro cronometro) {
+        this.cronometro = cronometro;
     }
 }
