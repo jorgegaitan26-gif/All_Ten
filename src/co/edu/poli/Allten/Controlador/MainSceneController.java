@@ -1,15 +1,31 @@
 package co.edu.poli.Allten.Controlador;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
+import javafx.beans.binding.Bindings;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import co.edu.poli.Allten.DAO.DAOJugador;
+import co.edu.poli.Allten.DAO.DAOPartida;
+import co.edu.poli.Allten.DAO.EntradaRanking;
+import co.edu.poli.Allten.Modelo.Jugador;
+import co.edu.poli.Allten.Modelo.Partida;
 
 /**
  * Controlador de la pantalla de menu principal (MainMenuView.fxml).
@@ -20,12 +36,25 @@ import javafx.stage.Stage;
  */
 public class MainSceneController {
 
+    /** Longitud maxima del nickname (columna VARCHAR(45) de la tabla Jugador). */
+    private static final int LONGITUD_MAXIMA_NICKNAME = 45;
+
+    private DAOJugador jugadorDAO = new DAOJugador();
+    private DAOPartida partidaDAO = new DAOPartida();
+
     /** Constructor por defecto; JavaFX lo invoca al cargar el FXML de esta pantalla. */
     public MainSceneController() {
     }
 
-    @FXML
-    private Button btnJugar;
+    @FXML private Button btnRetoDiario;
+
+    public void setPartidaDAO(DAOPartida partidaDAO) {
+        this.partidaDAO = partidaDAO;
+    }
+
+    public void setJugadorDAO(DAOJugador jugadorDAO) {
+        this.jugadorDAO = jugadorDAO;
+    }
 
     /**
      * Maneja el boton "Como jugar": abre InstruccionesView.fxml en una
@@ -45,54 +74,158 @@ public class MainSceneController {
     }
 
     /**
-     * Maneja el boton "Jugar": pide el nickname del jugador y, si lo
-     * escribe, carga JuegoView.fxml, le entrega el control a
-     * {@link JuegoController#iniciarPartida(String)} y reemplaza la escena
-     * de la ventana actual por la del juego.
-     *
-     * @throws Exception si el archivo FXML del juego no se puede cargar
+     * Inicia el reto diario para el nickname indicado.
      */
     @FXML
-    private void jugar() throws Exception {
+    private void jugarRetoDiario() throws Exception {
+        iniciarPartida(true);
+    }
 
+    /** Inicia una partida libre con números nuevos. */
+    @FXML
+    private void jugarPartidaLibre() throws Exception {
+        iniciarPartida(false);
+    }
+
+    /**
+     * Pide el nickname, identifica al jugador en la base de datos y abre la
+     * pantalla de juego.
+     *
+     * @param retoDiario true para el reto diario, false para una partida libre
+     */
+    private void iniciarPartida(boolean retoDiario) throws Exception {
         String nickname = pedirNickname();
         if (nickname == null) {
             return; // el jugador cancelo el dialogo o no escribio nada
+        }
+
+        Jugador jugador;
+        try {
+            jugador = identificarJugador(nickname);
+        } catch (IllegalArgumentException e) {
+            Alert alerta = new Alert(Alert.AlertType.WARNING);
+            alerta.setTitle("Nickname no válido");
+            alerta.setHeaderText("No se pudo iniciar la partida.");
+            alerta.setContentText(e.getMessage());
+            alerta.showAndWait();
+            return;
+        } catch (Exception e) {
+            mostrarErrorPersistencia("No se pudo registrar o cargar al jugador.", e);
+            return;
         }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/JuegoView.fxml"));
         Parent root = loader.load();
 
         JuegoController controlador = loader.getController();
-        controlador.iniciarPartida(nickname);
+        controlador.setPartidaDAO(partidaDAO);
+        controlador.iniciarPartida(jugador, retoDiario);
 
-        Stage ventanaActual = (Stage) btnJugar.getScene().getWindow();
+        Stage ventanaActual = (Stage) btnRetoDiario.getScene().getWindow();
         ventanaActual.setScene(new Scene(root, 1000, 700));
-        ventanaActual.setTitle("All Ten - " + nickname);
+        ventanaActual.setTitle("All Ten - " + jugador.getNickname());
     }
 
     /**
-     * Muestra un dialogo para que el jugador escriba su nickname.
+     * Busca al jugador por su nickname; si no existe, lo registra. En ambos
+     * casos devuelve el jugador con su id_Jugador.
+     *
+     * @param nickname nickname escrito por el jugador
+     * @return el jugador identificado
+     * @throws IllegalArgumentException si el nickname esta vacio o es muy largo
+     * @throws Exception si falla la base de datos
+     */
+    private Jugador identificarJugador(String nickname) throws Exception {
+        String limpio = nickname == null ? "" : nickname.trim();
+        if (limpio.isEmpty() || limpio.length() > LONGITUD_MAXIMA_NICKNAME) {
+            throw new IllegalArgumentException(
+                    "El nickname debe tener entre 1 y " + LONGITUD_MAXIMA_NICKNAME + " caracteres");
+        }
+
+        Jugador existente = jugadorDAO.readByNickname(limpio);
+        if (existente != null) {
+            return existente;
+        }
+
+        Jugador nuevo = new Jugador(limpio);
+        jugadorDAO.create(nuevo);   // le asigna el id generado
+        return nuevo;
+    }
+
+    /**
+     * Muestra un dialogo personalizado para que el jugador escriba su nickname.
      *
      * @return el nickname escrito (sin espacios sobrantes), o {@code null}
      *         si el jugador cancelo el dialogo o dejo el campo vacio
      */
     private String pedirNickname() {
-
-        TextInputDialog dialogo = new TextInputDialog();
+        Dialog<String> dialogo = new Dialog<>();
         dialogo.setTitle("All Ten");
-        dialogo.setHeaderText("Antes de empezar...");
-        dialogo.setContentText("Escribe tu nickname:");
+        dialogo.initOwner(btnRetoDiario.getScene().getWindow());
+        dialogo.getDialogPane().getStyleClass().add("nickname-dialog");
+        dialogo.getDialogPane().getStylesheets().add(
+                getClass().getResource("/vista/interfaz.css").toExternalForm());
 
-        Optional<String> respuesta = dialogo.showAndWait();
+        Label titulo = new Label("¿Listo para jugar?");
+        titulo.getStyleClass().add("nickname-title");
+        Label descripcion = new Label("Elige un nickname para guardar tus partidas.");
+        descripcion.getStyleClass().add("nickname-description");
 
-        if (respuesta.isEmpty() || respuesta.get().isBlank()) {
-            if (respuesta.isPresent()) {
-                new Alert(Alert.AlertType.WARNING, "Debes escribir un nickname para jugar.").showAndWait();
-            }
-            return null;
+        TextField campoNickname = new TextField();
+        campoNickname.setPromptText("Tu nickname");
+        campoNickname.setMaxWidth(Double.MAX_VALUE);
+        campoNickname.getStyleClass().add("nickname-field");
+        campoNickname.setTextFormatter(new TextFormatter<>(
+                change -> change.getControlNewText().length() <= LONGITUD_MAXIMA_NICKNAME
+                        ? change : null));
+
+        VBox contenido = new VBox(12, titulo, descripcion, campoNickname);
+        contenido.getStyleClass().add("nickname-content");
+        dialogo.getDialogPane().setContent(contenido);
+
+        ButtonType comenzar = new ButtonType("Comenzar", ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().setAll(comenzar, ButtonType.CANCEL);
+        dialogo.getDialogPane().lookupButton(comenzar).disableProperty().bind(
+                Bindings.createBooleanBinding(
+                        () -> campoNickname.getText().isBlank(), campoNickname.textProperty()));
+
+        dialogo.setResultConverter(boton -> boton == comenzar ? campoNickname.getText().trim() : null);
+        dialogo.setOnShown(evento -> campoNickname.requestFocus());
+        return dialogo.showAndWait().orElse(null);
+    }
+
+    @FXML
+    private void abrirRanking() {
+        try {
+            Date fechaReto = Partida.fechaActualDelReto();
+            List<EntradaRanking> partidas = partidaDAO.readRankingDelReto(fechaReto, 10);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/RankingView.fxml"));
+            Parent root = loader.load();
+            RankingController controlador = loader.getController();
+            controlador.setPartidas(partidas, fechaReto);
+
+            Stage ventana = new Stage();
+            ventana.setTitle("All Ten - Ranking");
+            ventana.initOwner(btnRetoDiario.getScene().getWindow());
+            ventana.initModality(Modality.WINDOW_MODAL);
+            ventana.setScene(new Scene(root, 820, 560));
+            ventana.showAndWait();
+        } catch (IOException e) {
+            Alert alerta = new Alert(Alert.AlertType.ERROR);
+            alerta.setTitle("Error al abrir el ranking");
+            alerta.setHeaderText("No se pudo cargar la pantalla del ranking.");
+            alerta.setContentText(e.getMessage());
+            alerta.showAndWait();
+        } catch (Exception e) {
+            mostrarErrorPersistencia("No se pudo consultar el ranking.", e);
         }
+    }
 
-        return respuesta.get().trim();
+    private void mostrarErrorPersistencia(String encabezado, Exception e) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Error de base de datos");
+        alerta.setHeaderText(encabezado);
+        alerta.setContentText(e.getMessage());
+        alerta.showAndWait();
     }
 }

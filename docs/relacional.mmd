@@ -1,0 +1,16 @@
+erDiagram
+    Jugador {
+        int id_Jugador PK
+        varchar nickname UK "VARCHAR(45)"
+    }
+
+    Partida {
+        int id_Partida PK
+        bigint tiempoTotal "segundos"
+        int Jugador_id_Jugador FK
+        text operacionesRealizadas "objetivos logrados, separados por ' | '"
+        datetime fechaFinalizacion
+        date fechaReto "NULL = partida libre"
+    }
+
+    Jugador ||--o{ Partida : "juega"

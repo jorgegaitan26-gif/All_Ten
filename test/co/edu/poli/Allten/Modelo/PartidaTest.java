@@ -58,6 +58,67 @@ class PartidaTest {
     }
 
     @Test
+    @DisplayName("Reto diario: la misma fecha da los mismos numeros a todos los jugadores")
+    void retoDiarioEsIgualParaTodos() {
+        Date hoy = Partida.fechaActualDelReto();
+
+        Partida deJulian = new Partida(new Jugador("julian"));
+        deJulian.setFechaReto(hoy);
+        Partida deAngie = new Partida(new Jugador("angie"));
+        deAngie.setFechaReto(hoy);
+
+        assertEquals(deJulian.generarNumerosValidos(), deAngie.generarNumerosValidos());
+    }
+
+    @Test
+    @DisplayName("Reto diario: fechas distintas generan retos distintos")
+    void retosDeDiasDistintos() {
+        java.util.Set<List<Integer>> combinaciones = new java.util.HashSet<>();
+        for (int dia = 1; dia <= 10; dia++) {
+            Partida partida = new Partida(new Jugador("julian"));
+            partida.setFechaReto(new Date(Partida.fechaActualDelReto().getTime() + dia * 86_400_000L));
+            combinaciones.add(partida.generarNumerosValidos());
+        }
+        assertTrue(combinaciones.size() > 1);
+    }
+
+    @Test
+    @DisplayName("fechaActualDelReto es hoy en Bogota, a las 00:00")
+    void fechaActualDelReto() {
+        java.time.ZoneId bogota = java.time.ZoneId.of("America/Bogota");
+        java.time.ZonedDateTime fecha = Partida.fechaActualDelReto().toInstant().atZone(bogota);
+        assertEquals(java.time.LocalDate.now(bogota), fecha.toLocalDate());
+        assertEquals(0, fecha.getHour());
+        assertEquals(0, fecha.getMinute());
+    }
+
+    @Test
+    @DisplayName("Partida libre: no repite la misma combinacion al generar otra vez")
+    void partidaLibreCambiaLaCombinacion() {
+        Partida partida = new Partida(new Jugador("julian"));
+        assertNull(partida.getFechaReto());
+        for (int i = 0; i < 5; i++) {
+            List<Integer> anterior = new ArrayList<>(partida.getNumerosDisponibles());
+            anterior.sort(null);
+            List<Integer> nueva = new ArrayList<>(partida.generarNumerosValidos());
+            nueva.sort(null);
+            assertFalse(nueva.equals(anterior), "se repitio " + nueva);
+        }
+    }
+
+    @Test
+    @DisplayName("Los numeros generados tienen al menos 3 valores distintos y ninguno mas de 2 veces")
+    void combinacionEquilibrada() {
+        for (int i = 0; i < 20; i++) {
+            List<Integer> numeros = new Partida(new Jugador("julian")).generarNumerosValidos();
+            assertTrue(new java.util.HashSet<>(numeros).size() >= 3, numeros.toString());
+            for (int numero : numeros) {
+                assertTrue(java.util.Collections.frequency(numeros, numero) <= 2, numeros.toString());
+            }
+        }
+    }
+
+    @Test
     @DisplayName("posiblesSoluciones devuelve expresiones que Expresion calcula al objetivo")
     void posiblesSolucionesSonCorrectas() {
         Partida partida = new Partida(new Jugador("julian"));

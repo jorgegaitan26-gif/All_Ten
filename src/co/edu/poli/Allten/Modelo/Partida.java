@@ -29,6 +29,10 @@ import javax.imageio.ImageIO;
  *
  * Niveles de dificultad: "FACIL" (+ - × ÷), "MEDIO" (+ potencia) y
  * "DIFICIL" (+ raiz cuadrada).
+ *
+ * Modos de juego: si la partida tiene {@code fechaReto} es un reto diario
+ * (todos reciben los mismos numeros ese dia); si {@code fechaReto} es
+ * {@code null} es una partida libre con numeros aleatorios.
  */
 public class Partida {
 
@@ -39,6 +43,8 @@ public class Partida {
     private List<String> operacionesRealizadas;
     private double tiempoTotal;
     private Date fechaFinalizacion;
+    /** Fecha del reto diario; {@code null} en una partida libre. */
+    private Date fechaReto;
     private String nivelDificultad;
     private Jugador jugador;
     private Cronometro cronometro;
@@ -84,19 +90,65 @@ public class Partida {
      * objetivos segun la dificultad: sortea numeros hasta que
      * {@link #posiblesSoluciones()} encuentra solucion para los 10.
      *
+     * <ul>
+     *   <li>Reto diario ({@code fechaReto} definida): la fecha es la semilla,
+     *       asi que todos los jugadores reciben la misma combinacion ese dia.</li>
+     *   <li>Partida libre ({@code fechaReto} nula): combinacion aleatoria,
+     *       distinta de la que tenia la partida antes.</li>
+     * </ul>
+     * Se descartan combinaciones con menos de 3 valores distintos o con un
+     * valor repetido mas de 2 veces.
+     *
      * @return los 4 numeros generados (quedan en numerosDisponibles)
      */
     public List<Integer> generarNumerosValidos() {
-        Random aleatorio = new Random();
+        List<Integer> anteriores = new ArrayList<>(numerosDisponibles);
+        anteriores.sort(null);
+
+        // La semilla del reto es el dia (sin hora) de fechaReto.
+        Random aleatorio = fechaReto != null
+                ? new Random(fechaReto.toInstant().atZone(java.time.ZoneId.of("America/Bogota"))
+                        .toLocalDate().toEpochDay())
+                : new Random();
+
+        boolean valida;
         do {
             List<Integer> candidatos = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 candidatos.add(1 + aleatorio.nextInt(9));
             }
             this.numerosDisponibles = candidatos;
-        } while (posiblesSoluciones().size() < 10);
+
+            int distintos = 0;
+            boolean repetidoDeMas = false;
+            for (int i = 0; i < 4; i++) {
+                if (candidatos.indexOf(candidatos.get(i)) == i) {
+                    distintos++;
+                }
+                if (java.util.Collections.frequency(candidatos, candidatos.get(i)) > 2) {
+                    repetidoDeMas = true;
+                }
+            }
+            List<Integer> ordenados = new ArrayList<>(candidatos);
+            ordenados.sort(null);
+            boolean igualALaAnterior = fechaReto == null && ordenados.equals(anteriores);
+
+            valida = distintos >= 3 && !repetidoDeMas && !igualALaAnterior
+                    && posiblesSoluciones().size() == 10;
+        } while (!valida);
 
         return numerosDisponibles;
+    }
+
+    /**
+     * Fecha de hoy en la zona horaria del reto (America/Bogota), a las
+     * 00:00. Se usa como {@code fechaReto} del reto diario.
+     *
+     * @return la fecha del reto de hoy
+     */
+    public static Date fechaActualDelReto() {
+        java.time.ZoneId zona = java.time.ZoneId.of("America/Bogota");
+        return Date.from(java.time.LocalDate.now(zona).atStartOfDay(zona).toInstant());
     }
 
     /**
@@ -414,6 +466,16 @@ public class Partida {
     /** @param fechaFinalizacion nueva fecha de finalizacion */
     public void setFechaFinalizacion(Date fechaFinalizacion) {
         this.fechaFinalizacion = fechaFinalizacion;
+    }
+
+    /** @return fecha del reto diario, o {@code null} si es una partida libre */
+    public Date getFechaReto() {
+        return fechaReto;
+    }
+
+    /** @param fechaReto fecha del reto diario, o {@code null} para una partida libre */
+    public void setFechaReto(Date fechaReto) {
+        this.fechaReto = fechaReto;
     }
 
     /** @return nivel de dificultad ("FACIL", "MEDIO" o "DIFICIL") */

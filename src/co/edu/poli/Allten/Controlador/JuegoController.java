@@ -11,12 +11,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import co.edu.poli.Allten.DAO.DAOPartida;
 import co.edu.poli.Allten.Modelo.Expresion;
 import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
@@ -34,14 +39,28 @@ public class JuegoController {
     @FXML private HBox filaOperadores;
     @FXML private StackPane zonaTrabajo;
     @FXML private Label lblExpresion;
+    @FXML private Label lblResultadoParcial;
     @FXML private Label lblMensaje;
     @FXML private Label lblTiempo;
     @FXML private Label lblTiempoFinal;
+    @FXML private Label lblModoPartida;
+    @FXML private Label lblTituloVictoria;
+    @FXML private Label lblInfoVictoria;
+    @FXML private Button btnJugarOtraVez;
+    @FXML private Button btnReiniciar;
     @FXML private StackPane panelVictoria;
+    @FXML private VBox panelAyuda;
+    @FXML private FlowPane listaAyuda;
+    @FXML private Label lblNumerosAyuda;
+    @FXML private Button btnAyuda;
 
     private Jugador jugador;
     private Partida partida;
     private Expresion intentoActual;
+    private DAOPartida partidaDAO;
+    private boolean partidaGuardada;
+    private boolean retoDiario;
+    private boolean ayudaCargada;
 
     private final Map<Integer, Label> etiquetasObjetivo = new HashMap<>();
     private final List<Button> botonesNumero = new ArrayList<>();
@@ -80,27 +99,57 @@ public class JuegoController {
     }
 
     /**
-     * Llamado por {@link MainSceneController} justo despues de cargar el
-     * FXML de esta pantalla. Crea al Jugador y su Partida, genera los
-     * numeros, arranca el cronometro y
-     * construye los controles dinamicos (fila de objetivos, operadores y
-     * numeros) y el reloj visible.
+     * Recibe el DAO con el que se guarda la partida al terminarla.
      *
-     * @param nickname nickname que el jugador escribio en el menu principal
+     * @param partidaDAO DAO de partidas
      */
-    public void iniciarPartida(String nickname) {
+    public void setPartidaDAO(DAOPartida partidaDAO) {
+        this.partidaDAO = partidaDAO;
+    }
 
-        jugador = new Jugador(nickname);
-        partida = new Partida(jugador);
-        partida.generarNumerosValidos();
-        partida.getCronometro().iniciar();
-        intentoActual = new Expresion(partida);
+    /**
+     * Llamado por {@link MainSceneController} justo despues de cargar el
+     * FXML de esta pantalla. Crea la Partida del jugador, genera los numeros,
+     * arranca el cronometro y construye los controles dinamicos (fila de
+     * objetivos, operadores y numeros) y el reloj visible.
+     *
+     * @param jugador    jugador identificado en el menu principal
+     * @param retoDiario true para el reto diario, false para una partida libre
+     */
+    public void iniciarPartida(Jugador jugador, boolean retoDiario) {
+
+        this.jugador = jugador;
+        this.retoDiario = retoDiario;
+        crearPartidaNueva();
+
+        lblModoPartida.setText(retoDiario ? "Reto diario" : "Partida libre");
+        btnReiniciar.setText(retoDiario ? "Reiniciar reto" : "Nueva partida");
+        btnJugarOtraVez.setText(retoDiario ? "Repetir reto diario" : "Nueva partida");
+        lblTituloVictoria.setText(retoDiario ? "Completaste el reto diario!" : "Completaste la partida!");
+        lblInfoVictoria.setText(retoDiario
+                ? "Puedes repetir este reto; el ranking diario conserva tu mejor tiempo."
+                : "Cada nueva partida genera una combinación diferente.");
 
         construirFilaObjetivos();
         construirFilaOperadores();
         reconstruirFilaNumeros();
         refrescarVista();
         iniciarReloj();
+    }
+
+    /**
+     * Crea una partida nueva del jugador en el modo actual: en el reto
+     * diario los numeros salen de la fecha de hoy; en la libre son aleatorios.
+     */
+    private void crearPartidaNueva() {
+        partida = new Partida(jugador);
+        if (retoDiario) {
+            partida.setFechaReto(Partida.fechaActualDelReto());
+        }
+        partida.generarNumerosValidos();
+        partida.getCronometro().iniciar();
+        partidaGuardada = false;
+        intentoActual = new Expresion(partida);
     }
 
     // =====================================================================
@@ -211,6 +260,7 @@ public class JuegoController {
      */
     private void onOperador(String operador) {
 
+        intentoActual.continuarOperacion();
         boolean agregado = intentoActual.agregarOperacion(operador);
 
         if (!agregado) {
@@ -278,7 +328,7 @@ public class JuegoController {
                 break;
 
             case DIVISION_POR_CERO:
-                mostrarMensaje("Esa expresión no se puede calcular (por ejemplo, una división por cero).");
+                mostrarMensaje("Esa expresión hace una división por cero.");
                 break;
 
             case NO_COINCIDE_OBJETIVO:
@@ -296,6 +346,7 @@ public class JuegoController {
 
             case PARTIDA_GANADA:
                 marcarUltimoObjetivoLogrado();
+                guardarPartidaFinalizada();
                 mostrarPanelVictoria();
                 break;
         }
@@ -369,6 +420,7 @@ public class JuegoController {
 
         String texto = intentoActual.getElementosExpresion();
         lblExpresion.setText(texto.isEmpty() ? "Toca un número para empezar" : texto);
+        refrescarResultadoParcial();
 
         // Cuantas veces se ha usado cada digito en la expresion actual.
         int[] usados = new int[10];
@@ -386,7 +438,33 @@ public class JuegoController {
                 usados[valor]--;
             }
             botonesNumero.get(i).setDisable(usado);
+            botonesNumero.get(i).pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("usado"), usado);
         }
+    }
+
+    private void refrescarResultadoParcial() {
+        if (!intentoActual.validarExpresionFinalizada() || !intentoActual.validarExpresion()) {
+            lblResultadoParcial.setText("");
+            return;
+        }
+
+        double resultado = intentoActual.calcularResultado();
+        if (Double.isNaN(resultado) || Double.isInfinite(resultado)) {
+            lblResultadoParcial.setText("");
+            return;
+        }
+
+        lblResultadoParcial.setText("Resultado parcial: " + formatearResultado(resultado));
+    }
+
+    private String formatearResultado(double resultado) {
+        double entero = Math.rint(resultado);
+        if (Math.abs(resultado - entero) < 1e-9) {
+            return String.valueOf((long) entero);
+        }
+        return String.format(java.util.Locale.ROOT, "%.4f", resultado)
+                .replaceAll("0+$", "")
+                .replaceAll("\\.$", "");
     }
 
     /** Colorea en verde la etiqueta del ultimo objetivo agregado a {@code Partida.getOperacionesRealizadas()}. */
@@ -415,6 +493,79 @@ public class JuegoController {
      */
     private void mostrarMensaje(String mensaje) {
         lblMensaje.setText(mensaje);
+    }
+
+    @FXML
+    private void mostrarAyuda() {
+        boolean mostrar = !panelAyuda.isVisible();
+        if (mostrar && !ayudaCargada) {
+            cargarSolucionesAyuda();
+            ayudaCargada = true;
+        }
+
+        panelAyuda.setVisible(mostrar);
+        panelAyuda.setManaged(mostrar);
+        btnAyuda.setText(mostrar ? "×" : "?");
+        btnAyuda.setAccessibleText(mostrar ? "Cerrar ayuda" : "Mostrar ayuda");
+    }
+
+    private void cargarSolucionesAyuda() {
+        lblNumerosAyuda.setText("Números: " + partida.getNumerosDisponibles());
+        List<String> soluciones = partida.posiblesSoluciones();
+        if (soluciones.isEmpty()) {
+            Label sinSoluciones = new Label("No se encontraron soluciones para este reto.");
+            sinSoluciones.getStyleClass().add("sin-soluciones-ayuda");
+            listaAyuda.getChildren().add(sinSoluciones);
+            return;
+        }
+
+        for (String solucion : soluciones) {
+            listaAyuda.getChildren().add(crearTarjetaAyuda(solucion));
+        }
+    }
+
+    private HBox crearTarjetaAyuda(String solucion) {
+        int separador = solucion.indexOf(" = ");
+        if (separador < 0) {
+            throw new IllegalArgumentException("Formato de solución inesperado: " + solucion);
+        }
+
+        Label objetivo = new Label(solucion.substring(0, separador));
+        objetivo.getStyleClass().add("objetivo-tarjeta-ayuda");
+        Label expresion = new Label(solucion.substring(separador + 3));
+        expresion.setWrapText(true);
+        HBox.setHgrow(expresion, Priority.ALWAYS);
+        expresion.getStyleClass().add("expresion-tarjeta-ayuda");
+
+        HBox tarjeta = new HBox(12, objetivo, expresion);
+        tarjeta.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        tarjeta.setPrefWidth(260);
+        tarjeta.getStyleClass().add("tarjeta-ayuda");
+        return tarjeta;
+    }
+
+    private void guardarPartidaFinalizada() {
+        if (partidaGuardada) {
+            return;
+        }
+        if (partidaDAO == null || jugador.getIdJugador() == null) {
+            mostrarErrorPersistencia("No se pudo guardar la partida: falta la conexión o el ID del jugador.");
+            return;
+        }
+        try {
+            partidaDAO.create(partida);
+            partidaGuardada = true;
+        } catch (Exception e) {
+            mostrarErrorPersistencia("No se pudo guardar la partida: " + e.getMessage());
+        }
+    }
+
+    private void mostrarErrorPersistencia(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Error al guardar la partida");
+        alerta.setHeaderText("La partida terminó, pero no quedó registrada.");
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 
     // =====================================================================
@@ -481,10 +632,7 @@ public class JuegoController {
     private void jugarOtraVez() {
 
         ocultarPanelVictoria();
-        partida = new Partida(jugador);
-        partida.generarNumerosValidos();
-        partida.getCronometro().iniciar();
-        intentoActual = new Expresion(partida);
+        crearPartidaNueva();
 
         reconstruirFilaNumeros();
         construirFilaObjetivos();

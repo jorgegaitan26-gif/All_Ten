@@ -187,4 +187,25 @@ class ExpresionTest {
         assertEquals(13, expresion.calcularResultado(), 1e-9);
         assertFalse(expresion.continuarOperacion());   // ya se usaron los 4 numeros
     }
+
+    @Test
+    @DisplayName("continuarOperacion no envuelve un solo numero ni algo que ya esta entre parentesis")
+    void continuarSinEnvolverDeMas() {
+        escribir("3");
+        assertTrue(expresion.continuarOperacion());
+        assertEquals("3", expresion.getElementosExpresion());
+
+        escribir("+ 4");
+        assertTrue(expresion.continuarOperacion());
+        assertEquals("( 3 + 4 )", expresion.getElementosExpresion());
+        assertTrue(expresion.continuarOperacion());
+        assertEquals("( 3 + 4 )", expresion.getElementosExpresion());
+
+        // Empieza con "(" pero el grupo se cierra antes del final: si se envuelve.
+        expresion = new Expresion(partida);
+        escribir("( 1 + 2 ) × 3");
+        assertTrue(expresion.continuarOperacion());
+        assertEquals("( ( 1 + 2 ) × 3 )", expresion.getElementosExpresion());
+        assertEquals(9, expresion.getResultado(), 1e-9);
+    }
 }

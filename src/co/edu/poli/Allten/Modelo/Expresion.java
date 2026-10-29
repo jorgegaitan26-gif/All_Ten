@@ -204,7 +204,8 @@ public class Expresion {
      * Permite seguir operando con el resultado parcial y los numeros que
      * faltan: si la expresion actual se puede calcular, guarda su valor en
      * resultado y la encierra entre parentesis para que funcione como un
-     * solo valor (ej. "3 + 4" pasa a "( 3 + 4 )").
+     * solo valor (ej. "3 + 4" pasa a "( 3 + 4 )"). Un solo numero o una
+     * expresion que ya esta toda entre parentesis se deja igual.
      *
      * @return true si se pudo continuar; false si ya se usaron los 4 numeros
      *         o la expresion actual no se puede calcular
@@ -221,7 +222,29 @@ public class Expresion {
             return false;
         }
 
-        elementosExpresion = PARENTESIS_ABRE + " " + elementosExpresion + " " + PARENTESIS_CIERRA;
+        // Un solo numero, o una expresion que ya esta toda entre parentesis,
+        // ya funciona como un solo valor: no hace falta volver a envolverla.
+        List<String> elementos = Arrays.asList(elementosExpresion.split(" "));
+        boolean yaEsUnValor = elementos.size() == 1;
+        if (!yaEsUnValor && PARENTESIS_ABRE.equals(elementos.get(0))) {
+            int balance = 0;
+            yaEsUnValor = true;
+            for (int i = 0; i < elementos.size() - 1; i++) {
+                if (PARENTESIS_ABRE.equals(elementos.get(i))) {
+                    balance++;
+                } else if (PARENTESIS_CIERRA.equals(elementos.get(i))) {
+                    balance--;
+                }
+                if (balance == 0) {
+                    yaEsUnValor = false;   // el primer "(" se cierra antes del final
+                    break;
+                }
+            }
+        }
+
+        if (!yaEsUnValor) {
+            elementosExpresion = PARENTESIS_ABRE + " " + elementosExpresion + " " + PARENTESIS_CIERRA;
+        }
         return true;
     }
 

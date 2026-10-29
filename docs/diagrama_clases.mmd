@@ -1,0 +1,59 @@
+---
+title: All Ten — Modelo de clases
+---
+classDiagram
+    direction LR
+
+    class Jugador {
+        -nickname: String
+        -id_Jugador: Integer
+    }
+
+    class Partida {
+        -numerosDisponibles: List~Integer~
+        -operacionesRealizadas: List~String~
+        -tiempoTotal: double
+        -fechaFinalizacion: Date
+        -fechaReto: Date
+        -nivelDificultad: String
+        -jugador: Jugador
+        -cronometro: Cronometro
+        +generarNumerosValidos() List~Integer~
+        +completarObjetivo(resultado: double) boolean
+        +comprobarObjetivosCompletados() boolean
+        +posiblesSoluciones() List~String~
+        +exportarResultados() void
+        +setDificultad(nuevaDificultad: String) void
+        +fechaActualDelReto()$ Date
+    }
+
+    class Expresion {
+        -elementosExpresion: String
+        -resultado: double
+        -partida: Partida
+        +concatenarDigitos(digito: int) boolean
+        +agregarOperacion(operador: String) boolean
+        +agregarParentesis(parentesis: String) boolean
+        +borrarUltimoElemento() void
+        +continuarOperacion() boolean
+        +validarExpresion() boolean
+        +validarPosicionOperador() boolean
+        +validarPosicionParentesis() boolean
+        +validarExpresionFinalizada() boolean
+        +validarNumerosPermitidos() boolean
+        +validarUsoDeNumeros() boolean
+        +calcularResultado() double
+    }
+
+    class Cronometro {
+        -tiempo_Inicio: Long
+        -tiempo_resultado: double
+        +iniciar() void
+        +detener() double
+    }
+
+    Partida "0..*" o-- "1" Jugador : hace parte de
+    Partida "1" *-- "0..*" Expresion
+    Partida "1" *-- "1" Cronometro
+
+    note for Partida "fechaReto con valor = reto diario (mismos numeros para todos ese dia)\nfechaReto null = partida libre (numeros aleatorios)"
