@@ -127,6 +127,7 @@
 
             <HBox spacing="14" alignment="CENTER">
                 <Button fx:id="btnJugarOtraVez" text="Jugar otra vez" styleClass="btn-comprobar" onAction="#jugarOtraVez"/>
+                <Button text="Compartir resultado" styleClass="btn-secundario" onAction="#compartirResultado"/>
                 <Button fx:id="btnCerrarVictoria" text="Menu" styleClass="btn-secundario" onAction="#volverAlMenu"/>
             </HBox>
 

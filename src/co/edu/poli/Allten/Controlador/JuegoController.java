@@ -62,6 +62,9 @@ public class JuegoController {
     private boolean retoDiario;
     private boolean ayudaCargada;
 
+    /** Expresiones con las que se logro cada objetivo (ej. "7 = 3 + 4"), para la tarjeta de resultados. */
+    private final List<String> expresionesLogradas = new ArrayList<>();
+
     private final Map<Integer, Label> etiquetasObjetivo = new HashMap<>();
     private final List<Button> botonesNumero = new ArrayList<>();
 
@@ -149,6 +152,7 @@ public class JuegoController {
         partida.generarNumerosValidos();
         partida.getCronometro().iniciar();
         partidaGuardada = false;
+        expresionesLogradas.clear();
         intentoActual = new Expresion(partida);
     }
 
@@ -348,6 +352,7 @@ public class JuegoController {
                 marcarUltimoObjetivoLogrado();
                 guardarPartidaFinalizada();
                 mostrarPanelVictoria();
+                compartirResultado();
                 break;
         }
 
@@ -399,6 +404,7 @@ public class JuegoController {
         }
 
         partida.completarObjetivo(valor);
+        expresionesLogradas.add((int) redondeado + " = " + intentoActual.getElementosExpresion());
 
         if (partida.comprobarObjetivosCompletados()) {
             return ResultadoIntento.PARTIDA_GANADA;
@@ -619,6 +625,21 @@ public class JuegoController {
 
         panelVictoria.setVisible(true);
         panelVictoria.setManaged(true);
+    }
+
+    /**
+     * Boton "Compartir resultado" del panel de victoria (tambien se abre solo
+     * al ganar): muestra la tarjeta de resultados, que se puede guardar o
+     * copiar como imagen.
+     */
+    @FXML
+    private void compartirResultado() {
+        try {
+            ResultadoController.mostrar(filaNumeros.getScene().getWindow(), jugador, partida,
+                    new ArrayList<>(expresionesLogradas));
+        } catch (java.io.IOException e) {
+            mostrarMensaje("No se pudo abrir la tarjeta de resultados.");
+        }
     }
 
     /** Oculta el panel de victoria (por ejemplo, al volver a jugar o al ir al menu). */

@@ -15,7 +15,8 @@ completa los diez; el cronómetro mide cuánto tardó.
 
 Durante la partida hay un **panel de ayuda** con una solución para cada objetivo y se
 muestra el **resultado parcial** de la expresión que se va armando. Al ganar, la partida
-se guarda en MySQL. El botón **Ranking** muestra los 10 mejores tiempos del reto de hoy
+se guarda en MySQL y se abre una **tarjeta de resultados** (tiempo, categoría de velocidad y
+operaciones) que se puede guardar como PNG o copiar para compartirla. El botón **Ranking** muestra los 10 mejores tiempos del reto de hoy
 (una entrada por jugador, con su mejor tiempo).
 
 ## Requisitos
@@ -54,6 +55,13 @@ Desde la raíz del proyecto:
 mvn clean javafx:run
 ```
 
+Para ver solo la tarjeta de resultados con datos de ejemplo (sin jugar ni usar la base de
+datos):
+
+```bash
+mvn javafx:run -Djavafx.mainClass=co.edu.poli.Allten.App.DemoResultado
+```
+
 ## Pruebas
 
 Las pruebas JUnit de los modelos están en `test/`:
@@ -67,7 +75,7 @@ mvn test
 ```
 src/co/edu/poli/Allten/
 ├── App/           Punto de entrada (App.java)
-├── Controlador/   Controladores de cada pantalla (menú, juego, ranking, instrucciones)
+├── Controlador/   Controladores de cada pantalla (menú, juego, ranking, resultado, instrucciones)
 ├── DAO/           Acceso a MySQL: CRUD, ConexionBD, DAOJugador, DAOPartida, EntradaRanking
 └── Modelo/        Jugador, Partida, Expresion, Cronometro
 src/vista/         Pantallas FXML, estilos CSS e imágenes
