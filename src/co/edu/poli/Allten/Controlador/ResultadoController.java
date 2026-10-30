@@ -11,6 +11,7 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -102,6 +103,27 @@ public class ResultadoController {
      * @throws IOException si no se puede cargar la vista
      */
     public static void mostrar(Window propietario, Jugador jugador, Partida partida,
+            List<String> expresiones) throws IOException {
+
+        // Las ventanas y el snapshot de JavaFX solo se pueden usar en su hilo
+        // (JavaFX Application Thread). Si se llama desde otro hilo, se
+        // reprograma en el hilo correcto en lugar de lanzar una excepcion.
+        if (!Platform.isFxApplicationThread()) {
+            Platform.runLater(() -> {
+                try {
+                    abrir(propietario, jugador, partida, expresiones);
+                } catch (IOException e) {
+                    System.err.println("No se pudo abrir la tarjeta de resultados: " + e.getMessage());
+                }
+            });
+            return;
+        }
+
+        abrir(propietario, jugador, partida, expresiones);
+    }
+
+    /** Carga la vista y abre la ventana; debe ejecutarse en el hilo de JavaFX. */
+    private static void abrir(Window propietario, Jugador jugador, Partida partida,
             List<String> expresiones) throws IOException {
 
         FXMLLoader loader = new FXMLLoader(
@@ -271,6 +293,13 @@ public class ResultadoController {
      * resolución y esquinas transparentes.
      */
     private WritableImage capturarTarjeta() {
+
+        // snapshot() solo funciona en el hilo de JavaFX; fuera de el lanza
+        // IllegalStateException con un mensaje poco claro.
+        if (!Platform.isFxApplicationThread()) {
+            throw new IllegalStateException(
+                    "La tarjeta solo se puede capturar en el hilo de JavaFX (JavaFX Application Thread).");
+        }
 
         SnapshotParameters parametros = new SnapshotParameters();
         parametros.setFill(Color.TRANSPARENT);

@@ -1,8 +1,6 @@
 package co.edu.poli.Allten.Controlador;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Dialog;
@@ -23,7 +21,6 @@ import javafx.stage.Stage;
 
 import co.edu.poli.Allten.DAO.DAOJugador;
 import co.edu.poli.Allten.DAO.DAOPartida;
-import co.edu.poli.Allten.DAO.EntradaRanking;
 import co.edu.poli.Allten.Modelo.Jugador;
 import co.edu.poli.Allten.Modelo.Partida;
 
@@ -197,18 +194,16 @@ public class MainSceneController {
     @FXML
     private void abrirRanking() {
         try {
-            Date fechaReto = Partida.fechaActualDelReto();
-            List<EntradaRanking> partidas = partidaDAO.readRankingDelReto(fechaReto, 10);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/RankingView.fxml"));
             Parent root = loader.load();
             RankingController controlador = loader.getController();
-            controlador.setPartidas(partidas, fechaReto);
+            controlador.setPartidaDAO(partidaDAO);   // carga el ranking de hoy; la ventana tiene filtros
 
             Stage ventana = new Stage();
             ventana.setTitle("All Ten - Ranking");
             ventana.initOwner(btnRetoDiario.getScene().getWindow());
             ventana.initModality(Modality.WINDOW_MODAL);
-            ventana.setScene(new Scene(root, 820, 560));
+            ventana.setScene(new Scene(root, 900, 600));
             ventana.showAndWait();
         } catch (IOException e) {
             Alert alerta = new Alert(Alert.AlertType.ERROR);
@@ -216,8 +211,6 @@ public class MainSceneController {
             alerta.setHeaderText("No se pudo cargar la pantalla del ranking.");
             alerta.setContentText(e.getMessage());
             alerta.showAndWait();
-        } catch (Exception e) {
-            mostrarErrorPersistencia("No se pudo consultar el ranking.", e);
         }
     }
 

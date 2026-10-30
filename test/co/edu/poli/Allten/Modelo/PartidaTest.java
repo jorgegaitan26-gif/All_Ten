@@ -137,6 +137,40 @@ class PartidaTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"FACIL", "MEDIO", "DIFICIL"})
+    @DisplayName("Solver: en cada dificultad, todas las soluciones son validas y calculan su objetivo")
+    void solverCorrectoPorDificultad(String nivel) {
+        for (int intento = 0; intento < 15; intento++) {
+            Partida partida = new Partida(new Jugador("julian"));
+            partida.setDificultad(nivel);
+            partida.generarNumerosValidos();
+
+            for (String solucion : partida.posiblesSoluciones()) {
+                String[] partes = solucion.split(" = ", 2);
+                Expresion expresion = new Expresion(partida);
+                expresion.setElementosExpresion(partes[1]);
+
+                assertTrue(expresion.validarExpresion(),
+                        nivel + " " + partida.getNumerosDisponibles() + ": solucion invalida " + solucion);
+                assertEquals(Integer.parseInt(partes[0]), expresion.calcularResultado(), 1e-9,
+                        nivel + " " + partida.getNumerosDisponibles() + ": " + solucion);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Solver: en FACIL las soluciones no usan potencias ni raices")
+    void solverFacilSoloOperadoresBasicos() {
+        for (int intento = 0; intento < 15; intento++) {
+            Partida partida = new Partida(new Jugador("julian"));
+            partida.generarNumerosValidos();
+            for (String solucion : partida.posiblesSoluciones()) {
+                assertFalse(solucion.contains(Expresion.POTENCIA) || solucion.contains(Expresion.RAIZ), solucion);
+            }
+        }
+    }
+
     @Test
     @DisplayName("completarObjetivo solo registra enteros pendientes del 1 al 10")
     void completarObjetivo() {
