@@ -174,8 +174,10 @@ public class ResultadoController {
         Date fecha = partida.getFechaFinalizacion() != null
                 ? partida.getFechaFinalizacion()
                 : new Date();
-        lblFecha.setText(new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-CO"))
-                .format(fecha));
+        String textoFecha = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-CO"))
+                .format(fecha);
+        lblFecha.setText("DIFICIL".equals(partida.getNivelDificultad())
+                ? textoFecha + " · Modo difícil" : textoFecha);
 
         boolean hayOperaciones = expresiones != null && !expresiones.isEmpty();
 

@@ -28,7 +28,7 @@ import javax.imageio.ImageIO;
  * {@link #setDificultad(String)}.
  *
  * Niveles de dificultad: "FACIL" (+ - × ÷), "MEDIO" (+ potencia) y
- * "DIFICIL" (+ raiz cuadrada).
+ * "DIFICIL" (+ potencia y raiz cuadrada). La interfaz solo ofrece FACIL y DIFICIL.
  *
  * Modos de juego: si la partida tiene {@code fechaReto} es un reto diario
  * (todos reciben los mismos numeros ese dia); si {@code fechaReto} es
@@ -134,7 +134,7 @@ public class Partida {
             boolean igualALaAnterior = fechaReto == null && ordenados.equals(anteriores);
 
             valida = distintos >= 3 && !repetidoDeMas && !igualALaAnterior
-                    && posiblesSoluciones().size() == 10;
+                    && contarObjetivosResolubles() == 10;
         } while (!valida);
 
         return numerosDisponibles;
@@ -202,8 +202,44 @@ public class Partida {
     public List<String> posiblesSoluciones() {
 
         List<String> lista = new ArrayList<>();
+        // En DIFICIL se recorre todo el espacio de busqueda para poder mostrar,
+        // cuando existan, soluciones que usen potencia o raiz.
+        String[] soluciones = buscarSoluciones("DIFICIL".equals(nivelDificultad));
+        for (int objetivo = 1; objetivo <= 10; objetivo++) {
+            if (soluciones[objetivo] != null) {
+                lista.add(objetivo + " = " + soluciones[objetivo]);
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Cuenta cuantos objetivos del 1 al 10 se pueden lograr (busqueda rapida,
+     * se detiene apenas encuentra los 10).
+     */
+    private int contarObjetivosResolubles() {
+        int total = 0;
+        for (String solucion : buscarSoluciones(false)) {
+            if (solucion != null) {
+                total++;
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Motor de busqueda de soluciones.
+     *
+     * @param preferirNuevos si es true no se detiene al encontrar los 10
+     *        objetivos y, para cada uno, prefiere una solucion que use potencia o
+     *        raiz sobre una que solo use + - × ÷
+     * @return arreglo de 11 posiciones (indice = objetivo); null si no hay solucion
+     */
+    private String[] buscarSoluciones(boolean preferirNuevos) {
+
+        String[] soluciones = new String[11];
         if (numerosDisponibles == null || numerosDisponibles.size() != 4) {
-            return lista;
+            return soluciones;
         }
 
         List<String> operadores = new ArrayList<>(List.of(
@@ -217,7 +253,7 @@ public class Partida {
         // Las 5 formas de agrupar 4 numeros, en notacion posfija (N = numero, O = operador).
         String[] formas = {"NNONONO", "NNONNOO", "NNNOONO", "NNNONOO", "NNNNOOO"};
 
-        String[] soluciones = new String[11];
+        boolean[] usaNuevos = new boolean[11];
         int encontradas = 0;
 
         busqueda:
@@ -296,11 +332,20 @@ public class Partida {
                                     double redondeado = Math.rint(valores[0]);
                                     int objetivo = (int) redondeado;
                                     if (Math.abs(valores[0] - redondeado) < 1e-9
-                                            && objetivo >= 1 && objetivo <= 10 && soluciones[objetivo] == null) {
+                                            && objetivo >= 1 && objetivo <= 10) {
                                         // Se quitan los parentesis exteriores
-                                        soluciones[objetivo] = textos[0].substring(2, textos[0].length() - 2);
-                                        encontradas++;
-                                        if (encontradas == 10) {
+                                        String texto = textos[0].substring(2, textos[0].length() - 2);
+                                        boolean nuevos = texto.contains(Expresion.POTENCIA)
+                                                || texto.contains(Expresion.RAIZ);
+                                        if (soluciones[objetivo] == null) {
+                                            soluciones[objetivo] = texto;
+                                            usaNuevos[objetivo] = nuevos;
+                                            encontradas++;
+                                        } else if (preferirNuevos && nuevos && !usaNuevos[objetivo]) {
+                                            soluciones[objetivo] = texto;
+                                            usaNuevos[objetivo] = true;
+                                        }
+                                        if (!preferirNuevos && encontradas == 10) {
                                             break busqueda;
                                         }
                                     }
@@ -312,12 +357,7 @@ public class Partida {
             }
         }
 
-        for (int objetivo = 1; objetivo <= 10; objetivo++) {
-            if (soluciones[objetivo] != null) {
-                lista.add(objetivo + " = " + soluciones[objetivo]);
-            }
-        }
-        return lista;
+        return soluciones;
     }
 
     /**

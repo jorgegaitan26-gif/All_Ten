@@ -39,7 +39,7 @@ public class ConexionBD {
     private static final String USUARIO_POR_DEFECTO = "root";
 
     private static final String PARAMETROS =
-            "?sslMode=PREFERRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&connectTimeout=10000";
+    "?sslMode=PREFERRED&serverTimezone=America/Bogota&allowPublicKeyRetrieval=true&connectTimeout=10000";
 
     private static ConexionBD instancia;
     private Connection conexion;

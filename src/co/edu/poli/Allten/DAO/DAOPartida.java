@@ -27,7 +27,7 @@ public class DAOPartida implements CRUD<Partida> {
     private static final String SEPARADOR = " | ";
 
     private static final String COLUMNAS =
-            "id_Partida, tiempoTotal, Jugador_id_Jugador, operacionesRealizadas, fechaFinalizacion, fechaReto";
+            "id_Partida, tiempoTotal, Jugador_id_Jugador, operacionesRealizadas, fechaFinalizacion, fechaReto, nivelDificultad";
 
     /**
      * Registra una partida nueva. Al terminar, el objeto recibido queda con el
@@ -48,7 +48,7 @@ public class DAOPartida implements CRUD<Partida> {
         Connection con = ConexionBD.getInstancia().getConexion();
 
         String sql = "INSERT INTO Partida (tiempoTotal, Jugador_id_Jugador, operacionesRealizadas, "
-                + "fechaFinalizacion, fechaReto) VALUES (?, ?, ?, ?, ?)";
+                + "fechaFinalizacion, fechaReto, nivelDificultad) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -57,6 +57,7 @@ public class DAOPartida implements CRUD<Partida> {
             ps.setString(3, String.join(SEPARADOR, p.getOperacionesRealizadas()));
             ps.setTimestamp(4, fecha(p));
             ps.setDate(5, p.getFechaReto() != null ? new java.sql.Date(p.getFechaReto().getTime()) : null);
+            ps.setString(6, p.getNivelDificultad());
 
             ps.executeUpdate();
 
@@ -244,15 +245,19 @@ public class DAOPartida implements CRUD<Partida> {
      * iguales, va primero la partida que se logro antes.
      *
      * @param fechaReto fecha del reto diario
+     * @param nivel dificultad del ranking: "FACIL" o "DIFICIL" (cada una tiene su propio ranking)
      * @param limite cantidad maxima de puestos a devolver (mayor que 0)
      * @return lista del mas rapido al mas lento, con la posicion ya asignada
      * @throws IllegalArgumentException si la fecha es nula o el limite no es positivo
      * @throws Exception si ocurre un error durante la consulta
      */
-    public List<EntradaRanking> readRankingDelReto(Date fechaReto, int limite) throws Exception {
+    public List<EntradaRanking> readRankingDelReto(Date fechaReto, String nivel, int limite) throws Exception {
 
         if (fechaReto == null) {
             throw new IllegalArgumentException("La fecha del reto no puede ser nula.");
+        }
+        if (nivel == null || nivel.isBlank()) {
+            nivel = "FACIL";
         }
         if (limite <= 0) {
             throw new IllegalArgumentException("El límite debe ser mayor que 0.");
@@ -264,15 +269,73 @@ public class DAOPartida implements CRUD<Partida> {
 
         String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
                 + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
-                + "WHERE p.fechaReto = ? AND p.id_Partida = ("
+                + "WHERE p.fechaReto = ? AND p.nivelDificultad = ? AND p.id_Partida = ("
                 + "SELECT p2.id_Partida FROM Partida p2 "
                 + "WHERE p2.Jugador_id_Jugador = p.Jugador_id_Jugador AND p2.fechaReto = p.fechaReto "
+                + "AND p2.nivelDificultad = p.nivelDificultad "
                 + "ORDER BY p2.tiempoTotal ASC, p2.fechaFinalizacion ASC, p2.id_Partida ASC LIMIT 1) "
                 + "ORDER BY p.tiempoTotal ASC, p.fechaFinalizacion ASC, p.id_Partida ASC LIMIT ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setDate(1, new java.sql.Date(fechaReto.getTime()));
+            ps.setString(2, nivel);
+            ps.setInt(3, limite);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                int posicion = 1;
+
+                while (rs.next()) {
+                    lista.add(new EntradaRanking(
+                            posicion++,
+                            rs.getString("nickname"),
+                            rs.getInt("tiempoTotal"),
+                            rs.getTimestamp("fechaFinalizacion")));
+                }
+            }
+        }
+
+        return lista;
+    }
+
+    /**
+     * Consulta el ranking permanente: los mejores tiempos de todos los retos
+     * diarios de una dificultad, con una sola entrada por jugador (su mejor
+     * tiempo). Las partidas libres no entran. Si dos tiempos son iguales, va
+     * primero la partida que se logro antes.
+     *
+     * @param nivel dificultad del ranking: "FACIL" o "DIFICIL"
+     * @param limite cantidad maxima de puestos a devolver (mayor que 0)
+     * @return lista del mas rapido al mas lento, con la posicion ya asignada
+     * @throws IllegalArgumentException si el limite no es positivo
+     * @throws Exception si ocurre un error durante la consulta
+     */
+    public List<EntradaRanking> readRankingGeneral(String nivel, int limite) throws Exception {
+
+        if (limite <= 0) {
+            throw new IllegalArgumentException("El límite debe ser mayor que 0.");
+        }
+        if (nivel == null || nivel.isBlank()) {
+            nivel = "FACIL";
+        }
+
+        List<EntradaRanking> lista = new ArrayList<>();
+
+        Connection con = ConexionBD.getInstancia().getConexion();
+
+        String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
+                + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
+                + "WHERE p.fechaReto IS NOT NULL AND p.nivelDificultad = ? AND p.id_Partida = ("
+                + "SELECT p2.id_Partida FROM Partida p2 "
+                + "WHERE p2.Jugador_id_Jugador = p.Jugador_id_Jugador AND p2.fechaReto IS NOT NULL "
+                + "AND p2.nivelDificultad = p.nivelDificultad "
+                + "ORDER BY p2.tiempoTotal ASC, p2.fechaFinalizacion ASC, p2.id_Partida ASC LIMIT 1) "
+                + "ORDER BY p.tiempoTotal ASC, p.fechaFinalizacion ASC, p.id_Partida ASC LIMIT ?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nivel);
             ps.setInt(2, limite);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -311,7 +374,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         String sql = "UPDATE Partida SET tiempoTotal = ?, Jugador_id_Jugador = ?, "
                 + "operacionesRealizadas = ?, fechaFinalizacion = COALESCE(?, fechaFinalizacion), "
-                + "fechaReto = ? WHERE id_Partida = ?";
+                + "fechaReto = ?, nivelDificultad = ? WHERE id_Partida = ?";
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -323,7 +386,8 @@ public class DAOPartida implements CRUD<Partida> {
             ps.setTimestamp(4, f != null ? new Timestamp(f.getTime()) : null);
 
             ps.setDate(5, p.getFechaReto() != null ? new java.sql.Date(p.getFechaReto().getTime()) : null);
-            ps.setInt(6, p.getIdPartida());
+            ps.setString(6, p.getNivelDificultad());
+            ps.setInt(7, p.getIdPartida());
 
             int filas = ps.executeUpdate();
 
@@ -453,6 +517,8 @@ public class DAOPartida implements CRUD<Partida> {
                         : new ArrayList<>(Arrays.asList(operaciones.split(Pattern.quote(SEPARADOR)))),
                 rs.getTimestamp("fechaFinalizacion"));
         partida.setFechaReto(rs.getDate("fechaReto"));
+        String nivel = rs.getString("nivelDificultad");
+        partida.setDificultad(nivel == null ? "FACIL" : nivel);
         return partida;
     }
 }
