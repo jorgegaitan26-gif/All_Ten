@@ -114,3 +114,43 @@
     -fx-background-color: #97c459;
     -fx-text-fill: white;
 }
+
+.dificultad-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d1b69;
+    -fx-padding: 6 0 0 0;
+}
+
+.dificultad-boton {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #d8d3c8;
+    -fx-border-radius: 12;
+    -fx-border-width: 2;
+    -fx-text-fill: #2d1b69;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+}
+
+.dificultad-boton:selected {
+    -fx-background-color: #7eb6e8;
+    -fx-border-color: #2d1b69;
+}
+
+.ranking-filtro {
+    -fx-background-color: #e4e1d6;
+    -fx-background-radius: 10;
+    -fx-text-fill: #2c2c2a;
+    -fx-font-weight: bold;
+    -fx-padding: 7 18;
+    -fx-cursor: hand;
+}
+
+.ranking-filtro:selected {
+    -fx-background-color: #2d1b69;
+    -fx-text-fill: white;
+}

@@ -97,9 +97,10 @@ public class InstruccionesController {
     private void mostrarOperadores() {
 
         actualizarContenido(
-                "Solo puedes usar suma (+), resta (-), multiplicación (×) y "
-                + "división (÷). Usa paréntesis para alterar el orden de las "
-                + "operaciones si lo necesitas.",
+                "En modo Fácil puedes usar suma (+), resta (-), multiplicación (×) y "
+                + "división (÷). En modo Difícil también tienes potencia (^) y raíz "
+                + "cuadrada (√), que se escribe antes del número, por ejemplo √ 9. "
+                + "Usa paréntesis para alterar el orden de las operaciones si lo necesitas.",
                 null,
                 btnOperadores,
                 "operadores.png"

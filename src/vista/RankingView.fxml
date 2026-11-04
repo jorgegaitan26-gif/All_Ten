@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -30,6 +31,10 @@
 
     <center>
         <VBox spacing="12" styleClass="ranking-content">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ToggleButton fx:id="btnRankingFacil" text="Fácil" styleClass="ranking-filtro"/>
+                <ToggleButton fx:id="btnRankingDificil" text="Difícil" styleClass="ranking-filtro"/>
+            </HBox>
             <TableView fx:id="tablaRanking" VBox.vgrow="ALWAYS" styleClass="ranking-table">
                 <placeholder>
                     <Label text="Aún no hay partidas completadas. ¡Sé el primero en entrar al ranking!"
@@ -42,7 +47,7 @@
                     <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="170"/>
                 </columns>
             </TableView>
-            <Label text="Puedes jugar cuantas veces quieras; el ranking muestra tu mejor tiempo del reto."
+            <Label text="Puedes jugar cuantas veces quieras; el ranking guarda tu mejor tiempo del reto diario en cada dificultad."
                    styleClass="ranking-footnote"/>
         </VBox>
     </center>

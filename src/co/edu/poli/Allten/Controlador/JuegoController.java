@@ -60,6 +60,8 @@ public class JuegoController {
     private DAOPartida partidaDAO;
     private boolean partidaGuardada;
     private boolean retoDiario;
+    /** Dificultad de todo el juego: "FACIL" o "DIFICIL" (se escoge antes de empezar). */
+    private String dificultad = "FACIL";
     private boolean ayudaCargada;
 
     /** Expresiones con las que se logro cada objetivo (ej. "7 = 3 + 4"), para la tarjeta de resultados. */
@@ -118,14 +120,17 @@ public class JuegoController {
      *
      * @param jugador    jugador identificado en el menu principal
      * @param retoDiario true para el reto diario, false para una partida libre
+     * @param dificultad "FACIL" (+ - × ÷) o "DIFICIL" (agrega potencia y raiz)
      */
-    public void iniciarPartida(Jugador jugador, boolean retoDiario) {
+    public void iniciarPartida(Jugador jugador, boolean retoDiario, String dificultad) {
 
         this.jugador = jugador;
         this.retoDiario = retoDiario;
+        this.dificultad = "DIFICIL".equals(dificultad) ? "DIFICIL" : "FACIL";
         crearPartidaNueva();
 
-        lblModoPartida.setText(retoDiario ? "Reto diario" : "Partida libre");
+        lblModoPartida.setText((retoDiario ? "Reto diario" : "Partida libre")
+                + " · " + ("DIFICIL".equals(this.dificultad) ? "Difícil" : "Fácil"));
         btnReiniciar.setText(retoDiario ? "Reiniciar reto" : "Nueva partida");
         btnJugarOtraVez.setText(retoDiario ? "Repetir reto diario" : "Nueva partida");
         lblTituloVictoria.setText(retoDiario ? "Completaste el reto diario!" : "Completaste la partida!");
@@ -146,6 +151,7 @@ public class JuegoController {
      */
     private void crearPartidaNueva() {
         partida = new Partida(jugador);
+        partida.setDificultad(dificultad);   // antes de generar los numeros: la dificultad define las soluciones
         if (retoDiario) {
             partida.setFechaReto(Partida.fechaActualDelReto());
         }
@@ -176,7 +182,10 @@ public class JuegoController {
         }
     }
 
-    /** Crea los botones "(", +, -, x, /, ")" y les asigna su accion sobre {@link #intentoActual}. */
+    /**
+     * Crea los botones "(", +, -, x, /, ")" y les asigna su accion sobre
+     * {@link #intentoActual}. En dificultad DIFICIL agrega ademas potencia (^) y raiz (√).
+     */
     private void construirFilaOperadores() {
 
         filaOperadores.getChildren().clear();
@@ -191,6 +200,18 @@ public class JuegoController {
             Button boton = crearBotonSimbolo(operador);
             boton.setOnAction(e -> onOperador(operador));
             filaOperadores.getChildren().add(boton);
+        }
+
+        if ("DIFICIL".equals(dificultad)) {
+            Button potencia = crearBotonSimbolo(Expresion.POTENCIA);
+            potencia.setOnAction(e -> onOperador(Expresion.POTENCIA));
+            potencia.setAccessibleText("Potencia");
+            filaOperadores.getChildren().add(potencia);
+
+            Button raiz = crearBotonSimbolo(Expresion.RAIZ);
+            raiz.setOnAction(e -> onRaiz());
+            raiz.setAccessibleText("Raíz cuadrada");
+            filaOperadores.getChildren().add(raiz);
         }
 
         Button parCierra = crearBotonSimbolo(")");
@@ -258,7 +279,7 @@ public class JuegoController {
     }
 
     /**
-     * Se llama cuando el jugador toca un tile de operador (+, -, x, /).
+     * Se llama cuando el jugador toca un tile de operador binario (+, -, ×, ÷ y, en DIFICIL, ^).
      *
      * @param operador simbolo del operador presionado
      */
@@ -269,6 +290,24 @@ public class JuegoController {
 
         if (!agregado) {
             mostrarMensaje("No puedes poner un operador ahí.");
+        } else {
+            mostrarMensaje("");
+        }
+
+        refrescarVista();
+    }
+
+    /**
+     * Se llama cuando el jugador toca el boton de raiz cuadrada. La raiz es un
+     * operador de prefijo (va antes del numero o del parentesis que afecta), por
+     * eso no se encierra la expresion actual como hacen los operadores binarios.
+     */
+    private void onRaiz() {
+
+        boolean agregado = intentoActual.agregarOperacion(Expresion.RAIZ);
+
+        if (!agregado) {
+            mostrarMensaje("La raíz va antes de un número o paréntesis, por ejemplo: √ 9 o 2 × √ 4.");
         } else {
             mostrarMensaje("");
         }

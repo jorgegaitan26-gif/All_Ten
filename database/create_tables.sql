@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS Partida (
     operacionesRealizadas TEXT NOT NULL,
     fechaFinalizacion DATETIME NOT NULL,
     fechaReto DATE NULL,
+    nivelDificultad VARCHAR(10) NOT NULL DEFAULT 'FACIL',
     PRIMARY KEY (id_Partida),
     KEY idx_partida_jugador (Jugador_id_Jugador),
     KEY idx_partida_fecha_finalizacion (fechaFinalizacion),

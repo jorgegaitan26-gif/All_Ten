@@ -1,8 +1,6 @@
 package co.edu.poli.Allten.Controlador;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Dialog;
@@ -17,15 +15,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import co.edu.poli.Allten.DAO.DAOJugador;
 import co.edu.poli.Allten.DAO.DAOPartida;
-import co.edu.poli.Allten.DAO.EntradaRanking;
 import co.edu.poli.Allten.Modelo.Jugador;
-import co.edu.poli.Allten.Modelo.Partida;
 
 /**
  * Controlador de la pantalla de menu principal (MainMenuView.fxml).
@@ -36,8 +35,20 @@ import co.edu.poli.Allten.Modelo.Partida;
  */
 public class MainSceneController {
 
+    /**
+     * Datos que se piden antes de empezar a jugar.
+     *
+     * @param nickname   nickname del jugador
+     * @param dificultad "FACIL" o "DIFICIL"
+     */
+    private record DatosInicio(String nickname, String dificultad) {
+    }
+
     /** Longitud maxima del nickname (columna VARCHAR(45) de la tabla Jugador). */
     private static final int LONGITUD_MAXIMA_NICKNAME = 45;
+
+    /** Ultima dificultad jugada; el ranking y el dialogo se abren en ella. */
+    private static String ultimaDificultad = "FACIL";
 
     private DAOJugador jugadorDAO = new DAOJugador();
     private DAOPartida partidaDAO = new DAOPartida();
@@ -94,10 +105,12 @@ public class MainSceneController {
      * @param retoDiario true para el reto diario, false para una partida libre
      */
     private void iniciarPartida(boolean retoDiario) throws Exception {
-        String nickname = pedirNickname();
-        if (nickname == null) {
+        DatosInicio datos = pedirDatosDeInicio();
+        if (datos == null) {
             return; // el jugador cancelo el dialogo o no escribio nada
         }
+        String nickname = datos.nickname();
+        ultimaDificultad = datos.dificultad();
 
         Jugador jugador;
         try {
@@ -119,7 +132,7 @@ public class MainSceneController {
 
         JuegoController controlador = loader.getController();
         controlador.setPartidaDAO(partidaDAO);
-        controlador.iniciarPartida(jugador, retoDiario);
+        controlador.iniciarPartida(jugador, retoDiario, datos.dificultad());
 
         Stage ventanaActual = (Stage) btnRetoDiario.getScene().getWindow();
         ventanaActual.setScene(new Scene(root, 1000, 700));
@@ -153,13 +166,14 @@ public class MainSceneController {
     }
 
     /**
-     * Muestra un dialogo personalizado para que el jugador escriba su nickname.
+     * Muestra un dialogo personalizado para que el jugador escriba su nickname
+     * y escoja la dificultad de toda la partida (Facil o Dificil).
      *
-     * @return el nickname escrito (sin espacios sobrantes), o {@code null}
+     * @return nickname (sin espacios sobrantes) y dificultad, o {@code null}
      *         si el jugador cancelo el dialogo o dejo el campo vacio
      */
-    private String pedirNickname() {
-        Dialog<String> dialogo = new Dialog<>();
+    private DatosInicio pedirDatosDeInicio() {
+        Dialog<DatosInicio> dialogo = new Dialog<>();
         dialogo.setTitle("All Ten");
         dialogo.initOwner(btnRetoDiario.getScene().getWindow());
         dialogo.getDialogPane().getStyleClass().add("nickname-dialog");
@@ -179,7 +193,23 @@ public class MainSceneController {
                 change -> change.getControlNewText().length() <= LONGITUD_MAXIMA_NICKNAME
                         ? change : null));
 
-        VBox contenido = new VBox(12, titulo, descripcion, campoNickname);
+        Label tituloDificultad = new Label("Dificultad");
+        tituloDificultad.getStyleClass().add("dificultad-title");
+        ToggleGroup grupoDificultad = new ToggleGroup();
+        ToggleButton btnFacil = crearBotonDificultad("Fácil", "+  −  ×  ÷", "FACIL", grupoDificultad);
+        ToggleButton btnDificil = crearBotonDificultad("Difícil", "+  −  ×  ÷  ^  √", "DIFICIL", grupoDificultad);
+        ("DIFICIL".equals(ultimaDificultad) ? btnDificil : btnFacil).setSelected(true);
+        // Siempre debe haber una dificultad escogida: no se deja deseleccionar.
+        grupoDificultad.selectedToggleProperty().addListener((obs, anterior, actual) -> {
+            if (actual == null && anterior != null) {
+                anterior.setSelected(true);
+            }
+        });
+        HBox filaDificultad = new HBox(10, btnFacil, btnDificil);
+        HBox.setHgrow(btnFacil, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(btnDificil, javafx.scene.layout.Priority.ALWAYS);
+
+        VBox contenido = new VBox(12, titulo, descripcion, campoNickname, tituloDificultad, filaDificultad);
         contenido.getStyleClass().add("nickname-content");
         dialogo.getDialogPane().setContent(contenido);
 
@@ -189,20 +219,31 @@ public class MainSceneController {
                 Bindings.createBooleanBinding(
                         () -> campoNickname.getText().isBlank(), campoNickname.textProperty()));
 
-        dialogo.setResultConverter(boton -> boton == comenzar ? campoNickname.getText().trim() : null);
+        dialogo.setResultConverter(boton -> boton == comenzar
+                ? new DatosInicio(campoNickname.getText().trim(),
+                        (String) grupoDificultad.getSelectedToggle().getUserData())
+                : null);
         dialogo.setOnShown(evento -> campoNickname.requestFocus());
         return dialogo.showAndWait().orElse(null);
+    }
+
+    /** Crea un boton de dificultad (tipo interruptor) con su nombre y los operadores que incluye. */
+    private ToggleButton crearBotonDificultad(String nombre, String operadores, String valor, ToggleGroup grupo) {
+        ToggleButton boton = new ToggleButton(nombre + "\n" + operadores);
+        boton.setUserData(valor);
+        boton.setToggleGroup(grupo);
+        boton.setMaxWidth(Double.MAX_VALUE);
+        boton.getStyleClass().add("dificultad-boton");
+        return boton;
     }
 
     @FXML
     private void abrirRanking() {
         try {
-            Date fechaReto = Partida.fechaActualDelReto();
-            List<EntradaRanking> partidas = partidaDAO.readRankingDelReto(fechaReto, 10);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/RankingView.fxml"));
             Parent root = loader.load();
             RankingController controlador = loader.getController();
-            controlador.setPartidas(partidas, fechaReto);
+            controlador.configurar(partidaDAO, ultimaDificultad);
 
             Stage ventana = new Stage();
             ventana.setTitle("All Ten - Ranking");
