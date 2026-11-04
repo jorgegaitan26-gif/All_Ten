@@ -2,7 +2,6 @@ package co.edu.poli.Allten.Controlador;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Date;
 import java.util.List;
 
 import co.edu.poli.Allten.DAO.DAOPartida;
