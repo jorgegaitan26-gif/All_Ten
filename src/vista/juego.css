@@ -197,6 +197,18 @@
     -fx-text-fill: #4A0E0E;
 }
 
+.mensaje-ritmo-rapido {
+    -fx-text-fill: #47751F;
+}
+
+.mensaje-ritmo-pausado {
+    -fx-text-fill: #A65E00;
+}
+
+.mensaje-ritmo-muy-pausado {
+    -fx-text-fill: #A34D16;
+}
+
 /* ---------- Tiles de numeros y operadores ---------- */
 
 .tile-numero {

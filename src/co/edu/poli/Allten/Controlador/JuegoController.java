@@ -34,6 +34,9 @@ import co.edu.poli.Allten.Modelo.Partida;
  */
 public class JuegoController {
 
+    private static final long UMBRAL_RITMO_RAPIDO_NANOS = 30_000_000_000L;
+    private static final long UMBRAL_RITMO_MUY_PAUSADO_NANOS = 60_000_000_000L;
+
     @FXML private HBox filaObjetivos;
     @FXML private HBox filaNumeros;
     @FXML private HBox filaOperadores;
@@ -63,6 +66,7 @@ public class JuegoController {
     /** Dificultad de todo el juego: "FACIL" o "DIFICIL" (se escoge antes de empezar). */
     private String dificultad = "FACIL";
     private boolean ayudaCargada;
+    private long inicioIntervaloObjetivoNanos;
 
     /** Expresiones con las que se logro cada objetivo (ej. "7 = 3 + 4"), para la tarjeta de resultados. */
     private final List<String> expresionesLogradas = new ArrayList<>();
@@ -157,6 +161,7 @@ public class JuegoController {
         }
         partida.generarNumerosValidos();
         partida.getCronometro().iniciar();
+        inicioIntervaloObjetivoNanos = System.nanoTime();
         partidaGuardada = false;
         expresionesLogradas.clear();
         intentoActual = new Expresion(partida);
@@ -384,11 +389,12 @@ public class JuegoController {
 
             case OBJETIVO_LOGRADO:
                 marcarUltimoObjetivoLogrado();
-                mostrarMensaje("¡Bien! Objetivo logrado.");
+                mostrarRetroalimentacionObjetivo();
                 break;
 
             case PARTIDA_GANADA:
                 marcarUltimoObjetivoLogrado();
+                mostrarRetroalimentacionObjetivo();
                 guardarPartidaFinalizada();
                 mostrarPanelVictoria();
                 compartirResultado();
@@ -537,7 +543,40 @@ public class JuegoController {
      * @param mensaje texto a mostrar al jugador
      */
     private void mostrarMensaje(String mensaje) {
+        lblMensaje.getStyleClass().removeAll(
+                "mensaje-ritmo-rapido", "mensaje-ritmo-pausado", "mensaje-ritmo-muy-pausado");
         lblMensaje.setText(mensaje);
+    }
+
+    private void mostrarRetroalimentacionObjetivo() {
+        long ahora = System.nanoTime();
+        long tiempoObjetivoNanos = ahora - inicioIntervaloObjetivoNanos;
+        double segundos = tiempoObjetivoNanos / 1_000_000_000.0;
+        inicioIntervaloObjetivoNanos = ahora;
+
+        String objetivo = partida.getOperacionesRealizadas()
+                .get(partida.getOperacionesRealizadas().size() - 1);
+        String tiempo = formatearDuracion(segundos);
+
+        if (tiempoObjetivoNanos <= UMBRAL_RITMO_RAPIDO_NANOS) {
+            mostrarMensajeConRitmo(
+                    "¡Vas muy bien! Objetivo " + objetivo + " en " + tiempo + ".",
+                    "mensaje-ritmo-rapido");
+        } else if (tiempoObjetivoNanos <= UMBRAL_RITMO_MUY_PAUSADO_NANOS) {
+            mostrarMensajeConRitmo(
+                    "¡Buen trabajo! Objetivo " + objetivo + " completado en " + tiempo
+                            + ". Sigue a tu ritmo.",
+                    "mensaje-ritmo-pausado");
+        } else {
+            mostrarMensajeConRitmo(
+                    "¡Vamos, tú puedes! Objetivo " + objetivo + " completado. Intenta un poco más rápido en el próximo.",
+                    "mensaje-ritmo-muy-pausado");
+        }
+    }
+
+    private void mostrarMensajeConRitmo(String mensaje, String estiloRitmo) {
+        mostrarMensaje(mensaje);
+        lblMensaje.getStyleClass().add(estiloRitmo);
     }
 
     @FXML
