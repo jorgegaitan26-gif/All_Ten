@@ -20,6 +20,8 @@ import co.edu.poli.Allten.Modelo.Partida;
  */
 public class DAOPartida implements CRUD<Partida> {
 
+    private final ConnectionProvider connectionProvider;
+
     /** Longitud máxima de operacionesRealizadas según la base de datos, VARCHAR(45). */
     private static final int MAX_OPERACIONES = 45;
 
@@ -28,6 +30,14 @@ public class DAOPartida implements CRUD<Partida> {
 
     private static final String COLUMNAS =
             "id_Partida, tiempoTotal, Jugador_id_Jugador, operacionesRealizadas, fechaFinalizacion, fechaReto, nivelDificultad";
+
+    public DAOPartida() {
+        this(() -> ConexionBD.getInstancia().getConexion());
+    }
+
+    DAOPartida(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
 
     /**
      * Registra una partida nueva. Al terminar, el objeto recibido queda con el
@@ -45,7 +55,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         validar(p);
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "INSERT INTO Partida (tiempoTotal, Jugador_id_Jugador, operacionesRealizadas, "
                 + "fechaFinalizacion, fechaReto, nivelDificultad) VALUES (?, ?, ?, ?, ?, ?)";
@@ -85,7 +95,7 @@ public class DAOPartida implements CRUD<Partida> {
     @Override
     public <K> Partida readone(K id) throws Exception {
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT " + COLUMNAS + " FROM Partida WHERE id_Partida = ?";
 
@@ -114,7 +124,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<Partida> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT " + COLUMNAS + " FROM Partida ORDER BY fechaFinalizacion DESC, id_Partida DESC";
 
@@ -139,7 +149,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<Partida> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT " + COLUMNAS
                 + " FROM Partida WHERE Jugador_id_Jugador = ? ORDER BY fechaFinalizacion DESC, id_Partida DESC";
@@ -174,7 +184,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<Partida> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT " + COLUMNAS + " FROM Partida ORDER BY tiempoTotal ASC, id_Partida ASC LIMIT ?";
 
@@ -210,7 +220,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<EntradaRanking> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
                 + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
@@ -265,7 +275,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<EntradaRanking> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
                 + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
@@ -322,7 +332,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         List<EntradaRanking> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT j.nickname, p.tiempoTotal, p.fechaFinalizacion "
                 + "FROM Partida p INNER JOIN Jugador j ON j.id_Jugador = p.Jugador_id_Jugador "
@@ -370,7 +380,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         validar(p);
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "UPDATE Partida SET tiempoTotal = ?, Jugador_id_Jugador = ?, "
                 + "operacionesRealizadas = ?, fechaFinalizacion = COALESCE(?, fechaFinalizacion), "
@@ -415,7 +425,7 @@ public class DAOPartida implements CRUD<Partida> {
 
         int idPartida = aEntero(id);
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "DELETE FROM Partida WHERE id_Partida = ?";
 
@@ -443,7 +453,7 @@ public class DAOPartida implements CRUD<Partida> {
      */
     public String deleteByJugador(int idJugador) throws Exception {
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "DELETE FROM Partida WHERE Jugador_id_Jugador = ?";
 
