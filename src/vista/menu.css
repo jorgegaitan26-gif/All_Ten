@@ -1,0 +1,164 @@
+/* ============================================================
+   Menu principal de All Ten
+   Paleta (documento de colorimetria):
+   crema #F1EFE8 | morado #2D1B69 | azul #85B7EB | naranja #EF9F27 | verde #97C459
+   Texto sobre cada color de relleno: oscuro (contraste >= 4.5:1, WCAG AA).
+   ============================================================ */
+
+/* Fondo: cuaderno cuadriculado (mismo recurso que "Como jugar") */
+.menu-root {
+    -fx-background-color: #97C459;
+    -fx-background-image: url("images/fondo_cuadricula.png");
+    -fx-background-repeat: repeat;
+    -fx-font-family: "Poppins", "Segoe UI", "System";
+}
+
+/* ---------- Tarjeta central ---------- */
+.menu-tarjeta {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 36;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 36;
+    -fx-border-width: 2;
+    -fx-padding: 30 40 28 40;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.28), 28, 0.12, 0, 10);
+}
+
+.menu-titulo {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.menu-subtitulo {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5F5E5A;
+}
+
+.menu-pie {
+    -fx-font-size: 12px;
+    -fx-text-fill: #5F5E5A;
+}
+
+/* ---------- Fila 1..10 ---------- */
+.menu-bola {
+    -fx-background-color: #85B7EB;
+    -fx-background-radius: 100;
+    -fx-text-fill: #042C53;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-width: 30px;
+    -fx-pref-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
+
+/* ---------- Botones del menu: TODOS del mismo tamano ---------- */
+.btn-menu {
+    -fx-pref-width: 340px;
+    -fx-min-width: 340px;
+    -fx-max-width: 340px;
+    -fx-pref-height: 66px;
+    -fx-min-height: 66px;
+    -fx-max-height: 66px;
+
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-graphic-text-gap: 18;
+    -fx-padding: 0 22 6 18;
+
+    /* Efecto "ficha" con borde inferior grueso: [0] sombra/borde, [1] cara */
+    -fx-background-insets: 0, 0 0 6 0;
+    -fx-background-radius: 20, 20;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.btn-menu:hover {
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.30), 10, 0.1, 0, 3);
+}
+
+.btn-menu:pressed {
+    -fx-translate-y: 4;
+    -fx-background-insets: 0, 0 0 2 0;
+    -fx-padding: 0 22 2 18;
+    -fx-effect: null;
+}
+
+/* Foco de teclado visible (no depender solo del color) */
+.btn-menu:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 20;
+    -fx-border-insets: -2 -2 -2 -2;
+}
+
+.btn-menu-verde {
+    -fx-background-color: #6E9A33, #97C459;
+    -fx-text-fill: #173404;
+}
+.btn-menu-verde:hover { -fx-background-color: #6E9A33, #A6D068; }
+
+.btn-menu-azul {
+    -fx-background-color: #5E97CE, #85B7EB;
+    -fx-text-fill: #042C53;
+}
+.btn-menu-azul:hover { -fx-background-color: #5E97CE, #95C3F0; }
+
+.btn-menu-naranja {
+    -fx-background-color: #C77F0A, #EF9F27;
+    -fx-text-fill: #412402;
+}
+.btn-menu-naranja:hover { -fx-background-color: #C77F0A, #F5AE42; }
+
+.btn-menu-crema {
+    -fx-background-color: #C9C3B4, #FFFFFF;
+    -fx-text-fill: #2D1B69;
+}
+.btn-menu-crema:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+
+/* Insignia redonda con el icono, a la izquierda de cada boton */
+.menu-icono {
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    -fx-background-radius: 100;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-pref-width: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+}
+
+.menu-icono-morado {
+    -fx-background-color: #2D1B69;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ---------- Fichas decorativas flotantes ---------- */
+.deco-ficha {
+    -fx-background-radius: 16, 16;
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+    -fx-font-size: 30px;
+    -fx-opacity: 0.9;
+}
+
+.deco-numero {
+    -fx-background-color: #5E97CE, #85B7EB;
+    -fx-text-fill: #042C53;
+}
+
+.deco-operador {
+    -fx-background-color: #C77F0A, #EF9F27;
+    -fx-text-fill: #412402;
+}

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -51,6 +52,7 @@ public class JuegoController {
     @FXML private Label lblInfoVictoria;
     @FXML private Button btnJugarOtraVez;
     @FXML private Button btnReiniciar;
+    @FXML private Button btnComoJugar;
     @FXML private StackPane panelVictoria;
     @FXML private VBox panelAyuda;
     @FXML private FlowPane listaAyuda;
@@ -646,6 +648,7 @@ public class JuegoController {
 
     private void mostrarErrorPersistencia(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
+        co.edu.poli.Allten.App.Estilos.aplicarFuente(alerta);
         alerta.setTitle("Error al guardar la partida");
         alerta.setHeaderText("La partida terminó, pero no quedó registrada.");
         alerta.setContentText(mensaje);
@@ -748,6 +751,34 @@ public class JuegoController {
     @FXML
     private void reiniciarPartida() {
         jugarOtraVez();
+    }
+
+    /**
+     * Boton "Como jugar" (disponible en reto diario y partida libre): abre las
+     * instrucciones en una ventana modal. Mientras estan abiertas el cronometro
+     * se pausa, para que leerlas no cuente contra el tiempo del jugador.
+     */
+    @FXML
+    private void abrirInstrucciones() {
+        boolean relojCorriendo = reloj != null && reloj.getStatus() == Animation.Status.RUNNING;
+        long inicioPausa = System.nanoTime();
+        if (relojCorriendo) {
+            reloj.pause();
+        }
+
+        InstruccionesController.mostrar(filaNumeros.getScene().getWindow(), () -> {
+            if (!relojCorriendo) {
+                return;
+            }
+            // Se descuenta del cronometro el tiempo que estuvieron abiertas las instrucciones.
+            long pausaNanos = System.nanoTime() - inicioPausa;
+            Long inicio = partida.getCronometro().getTiempo_Inicio();
+            if (inicio != null) {
+                partida.getCronometro().setTiempo_Inicio(inicio + pausaNanos);
+            }
+            inicioIntervaloObjetivoNanos += pausaNanos;
+            reloj.play();
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.TimeZone;
 
@@ -33,6 +34,10 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) throws Exception {
+
+        // Fuente Poppins para todas las pantallas (ver src/vista/fonts)
+        Font.loadFont(App.class.getResourceAsStream("/vista/fonts/Poppins-Regular.ttf"), 12);
+        Font.loadFont(App.class.getResourceAsStream("/vista/fonts/Poppins-Bold.ttf"), 12);
 
         // La aplicacion inicia en el menu principal
         Parent root = FXMLLoader.load(

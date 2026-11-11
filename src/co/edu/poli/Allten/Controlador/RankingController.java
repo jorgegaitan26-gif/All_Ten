@@ -11,6 +11,7 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
@@ -55,6 +56,24 @@ public class RankingController {
         columnaFecha.setCellValueFactory(datos ->
                 new ReadOnlyStringWrapper(new SimpleDateFormat(FORMATO_FECHA)
                         .format(datos.getValue().getFechaFinalizacion())));
+
+        // Posicion dentro de una insignia redonda (1.º naranja, 2.º azul, 3.º verde); el numero siempre se ve.
+        columnaPosicion.setCellFactory(columna -> new TableCell<>() {
+            @Override
+            protected void updateItem(Number posicion, boolean vacia) {
+                super.updateItem(posicion, vacia);
+                if (vacia || posicion == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
+                int n = posicion.intValue();
+                Label insignia = new Label(String.valueOf(n));
+                insignia.getStyleClass().addAll("pos-insignia", n >= 1 && n <= 3 ? "pos-" + n : "pos-otro");
+                setGraphic(insignia);
+                setText(null);
+            }
+        });
 
         columnaPosicion.setSortable(false);
         columnaJugador.setSortable(false);

@@ -1,39 +1,68 @@
-/* Fondo general de la ventana: crema claro, como en el mockup */
+/* ============================================================
+   "¿Como jugar?"
+   crema #F1EFE8 | morado #2D1B69 | azul #85B7EB | naranja #EF9F27 | verde #97C459
+   ============================================================ */
+
 .instrucciones-root {
-    -fx-background-color:#97c459;
+    -fx-background-color: #97C459;
+    -fx-background-image: url("images/fondo_cuadricula.png");
+    -fx-background-repeat: repeat;
+    -fx-font-family: "Poppins", "Segoe UI", "System";
 }
 
-/* La "tarjeta" verde que contiene todo, flotando sobre el fondo crema */
-.tarjeta-verde {
-    -fx-background-color: #f1efe8;
-    -fx-background-radius: 40;
-    -fx-padding: 25;
-    -fx-max-width: 700;
-    -fx-max-height: 350;
+/* Tarjeta crema que contiene todo */
+.tarjeta-crema {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 32;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 32;
+    -fx-border-width: 2;
+    -fx-padding: 22 26 24 26;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.28), 26, 0.12, 0, 9);
 }
 
 .header-bar {
     -fx-background-color: transparent;
 }
 
-/* Título "Como jugar?" con su píldora azul de fondo, como en el mockup */
-.titulo-pantalla {
-    -fx-font-size: 22px;
+/* Insignia "?" + titulo en pastilla azul */
+.titulo-icono {
+    -fx-background-color: #EF9F27;
+    -fx-background-radius: 100;
+    -fx-text-fill: #412402;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #2D1B69;
-    -fx-background-color: #7EB6E8;
-    -fx-background-radius: 20;
-    -fx-padding: 12 30 12 30;
+    -fx-alignment: CENTER;
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
 }
 
-.btn-volver {
-    -fx-background-color: #F5A623;
-    -fx-text-fill: #FFFFFF;
+.titulo-pantalla {
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-background-radius: 20;
-    -fx-padding: 8 18 8 18;
-    -fx-cursor: hand;
+    -fx-text-fill: #2D1B69;
+    -fx-background-color: #85B7EB;
+    -fx-background-radius: 24;
+    -fx-padding: 8 28 8 28;
 }
+
+/* ---------- Boton "Volver" (ficha naranja con borde inferior) ---------- */
+.btn-volver {
+    -fx-background-color: #C77F0A, #EF9F27;
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 16, 16;
+    -fx-text-fill: #412402;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 12 20;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.btn-volver:hover   { -fx-background-color: #C77F0A, #F5AE42; }
+.btn-volver:pressed { -fx-translate-y: 3; -fx-background-insets: 0, 0 0 1 0; }
 
 .cuerpo {
     -fx-background-color: transparent;
@@ -41,56 +70,134 @@
 
 .menu-lateral {
     -fx-background-color: transparent;
+    -fx-min-width: 190px;
+    -fx-pref-width: 190px;
+    -fx-max-width: 190px;
 }
 
+/* ---------- Categorias ---------- */
 .btn-categoria {
-    -fx-background-color: #F5A623;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 14px;
+    -fx-background-color: #C9C3B4, #FFFFFF;
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-background-radius: 16, 16;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-background-radius: 16px;
+    -fx-alignment: CENTER;
+    -fx-padding: 0 10 5 10;
 
-    /* TAMAÑO FIJO */
-    -fx-pref-width: 150px;
-    -fx-pref-height: 50px;
-
-    -fx-min-width: 150px;
-    -fx-min-height: 50px;
-
-    -fx-max-width: 150px;
-    -fx-max-height: 50px;
+    -fx-pref-width: 190px;
+    -fx-min-width: 190px;
+    -fx-max-width: 190px;
+    -fx-pref-height: 56px;
+    -fx-min-height: 56px;
+    -fx-max-height: 56px;
 
     -fx-cursor: hand;
-    -fx-alignment: CENTER;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.btn-categoria:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+.btn-categoria:pressed { -fx-translate-y: 3; -fx-background-insets: 0, 0 0 2 0; }
+.btn-categoria:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+    -fx-border-insets: -2;
+}
 
+/* Categoria activa: azul (color de los numeros) */
+.btn-categoria-activo {
+    -fx-background-color: #5E97CE, #85B7EB;
+    -fx-text-fill: #042C53;
+}
+.btn-categoria-activo:hover { -fx-background-color: #5E97CE, #95C3F0; }
+
+/* ---------- Panel de contenido (tarjeta blanca) ---------- */
+.panel-contenido {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 24;
+    -fx-border-width: 1.5;
+    -fx-padding: 20 24 18 24;
+}
+
+.titulo-categoria {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.texto-contenido {
+    -fx-font-size: 16px;
+    -fx-text-fill: #302B3D;
+    -fx-line-spacing: 4;
+}
+
+/* Caja de ejemplo: crema con franja naranja a la izquierda */
+.caja-ejemplo {
+    -fx-background-color: #EF9F27, #F1EFE8;
+    -fx-background-insets: 0, 0 0 0 6;
+    -fx-background-radius: 14, 14;
+    -fx-padding: 12 16 12 22;
+}
+
+.linea-ejemplo {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.linea-ejemplo-titulo {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5F5E5A;
+}
+
+/* Imagen dentro de un marco redondeado */
+.marco-imagen {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 20;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-padding: 10;
+}
+
+/* ---------- Navegacion Anterior / Siguiente ---------- */
+.btn-nav,
+.btn-nav-primario {
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 14, 14;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 12 20;
+    -fx-cursor: hand;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
 
-.btn-categoria-activo {
-    -fx-background-color: #7EB6E8;
+.btn-nav {
+    -fx-background-color: #C9C3B4, #F1EFE8;
     -fx-text-fill: #2D1B69;
 }
 
-.panel-contenido {
-    -fx-background-color: #7EB6E8;
-    -fx-background-radius: 18;
+.btn-nav-primario {
+    -fx-background-color: #6E9A33, #97C459;
+    -fx-text-fill: #173404;
 }
 
-.texto-contenido {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-fill: #2D1B69;
-}
-
-.caja-ejemplo {
-    -fx-background-color: #F2EEE4;
-    -fx-background-radius: 12;
-    -fx-padding: 15;
-}
-
-.linea-ejemplo {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2D1B69;
+.btn-nav:hover            { -fx-background-color: #C9C3B4, #FBFAF6; }
+.btn-nav-primario:hover   { -fx-background-color: #6E9A33, #A6D068; }
+.btn-nav:pressed,
+.btn-nav-primario:pressed { -fx-translate-y: 3; -fx-background-insets: 0, 0 0 1 0; }
+.btn-nav:disabled         { -fx-opacity: 0.45; }
+.btn-nav:focused,
+.btn-nav-primario:focused,
+.btn-volver:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 14;
+    -fx-border-insets: -2;
 }

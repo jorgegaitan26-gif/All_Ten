@@ -8,47 +8,62 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.poli.Allten.Controlador.RankingController"
-            styleClass="ranking-root"
-            stylesheets="@interfaz.css">
-    <padding>
-        <Insets top="28" right="34" bottom="24" left="34"/>
-    </padding>
+<!-- Ranking: cuaderno verde + tarjeta crema, igual que el menu y "Como jugar". -->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="co.edu.poli.Allten.Controlador.RankingController"
+           styleClass="ranking-root"
+           stylesheets="@interfaz.css">
 
-    <top>
-        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="ranking-header">
-            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Ranking" styleClass="ranking-title"/>
-                <Label fx:id="lblRetoDiario" text="Mejores tiempos del reto diario" styleClass="ranking-subtitle"/>
-            </VBox>
-            <Button text="Cerrar" onAction="#cerrar" styleClass="ranking-close"/>
-        </HBox>
-    </top>
+    <BorderPane styleClass="ranking-tarjeta">
+        <StackPane.margin>
+            <Insets top="26" right="30" bottom="26" left="30"/>
+        </StackPane.margin>
 
-    <center>
-        <VBox spacing="12" styleClass="ranking-content">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ToggleButton fx:id="btnRankingFacil" text="Fácil" styleClass="ranking-filtro"/>
-                <ToggleButton fx:id="btnRankingDificil" text="Difícil" styleClass="ranking-filtro"/>
+        <top>
+            <HBox alignment="CENTER_LEFT" spacing="14" styleClass="ranking-header">
+                <Label text="#" styleClass="ranking-icono"/>
+                <VBox spacing="3" HBox.hgrow="ALWAYS">
+                    <Label text="Ranking" styleClass="ranking-title"/>
+                    <Label fx:id="lblRetoDiario" text="Mejores tiempos del reto diario" styleClass="ranking-subtitle"/>
+                </VBox>
+                <Button text="Cerrar" onAction="#cerrar" styleClass="ranking-close"/>
             </HBox>
-            <TableView fx:id="tablaRanking" VBox.vgrow="ALWAYS" styleClass="ranking-table">
-                <placeholder>
-                    <Label text="Aún no hay partidas completadas. ¡Sé el primero en entrar al ranking!"
-                           styleClass="ranking-empty"/>
-                </placeholder>
-                <columns>
-                    <TableColumn fx:id="columnaPosicion" text="#" prefWidth="75"/>
-                    <TableColumn fx:id="columnaJugador" text="Jugador" prefWidth="300"/>
-                    <TableColumn fx:id="columnaTiempo" text="Tiempo" prefWidth="170"/>
-                    <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="170"/>
-                </columns>
-            </TableView>
-            <Label text="Puedes jugar cuantas veces quieras; el ranking guarda tu mejor tiempo del reto diario en cada dificultad."
-                   styleClass="ranking-footnote"/>
-        </VBox>
-    </center>
-</BorderPane>
+        </top>
+
+        <center>
+            <VBox spacing="12" styleClass="ranking-content">
+                <BorderPane.margin>
+                    <Insets top="16"/>
+                </BorderPane.margin>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Dificultad:" styleClass="ranking-etiqueta"/>
+                    <ToggleButton fx:id="btnRankingFacil" text="Fácil" styleClass="ranking-filtro"/>
+                    <ToggleButton fx:id="btnRankingDificil" text="Difícil" styleClass="ranking-filtro"/>
+                </HBox>
+
+                <TableView fx:id="tablaRanking" VBox.vgrow="ALWAYS" styleClass="ranking-table">
+                    <placeholder>
+                        <Label text="Aún no hay partidas completadas. ¡Sé el primero en entrar al ranking!"
+                               styleClass="ranking-empty"/>
+                    </placeholder>
+                    <columns>
+                        <TableColumn fx:id="columnaPosicion" text="#" prefWidth="80"/>
+                        <TableColumn fx:id="columnaJugador" text="Jugador" prefWidth="290"/>
+                        <TableColumn fx:id="columnaTiempo" text="Tiempo" prefWidth="160"/>
+                        <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="160"/>
+                    </columns>
+                </TableView>
+
+                <Label text="Puedes jugar cuantas veces quieras; el ranking guarda tu mejor tiempo del reto diario en cada dificultad."
+                       styleClass="ranking-footnote" wrapText="true"/>
+            </VBox>
+        </center>
+
+    </BorderPane>
+
+</StackPane>

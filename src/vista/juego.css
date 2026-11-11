@@ -1,5 +1,6 @@
 .juego-root {
     -fx-background-color: #97c459;
+    -fx-font-family: "Poppins", "Segoe UI", "System";
 }
 
 .juego-fondo {
@@ -35,109 +36,6 @@
     -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #2D1B69;
-}
-
-.btn-secundario {
-    -fx-background-color: #F5A623;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 16;
-    -fx-padding: 8 18 8 18;
-    -fx-cursor: hand;
-}
-
-.boton-ayuda {
-    -fx-background-color: #EF9F27;
-    -fx-text-fill: #412402;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 100;
-    -fx-min-width: 54px;
-    -fx-min-height: 54px;
-    -fx-max-width: 54px;
-    -fx-max-height: 54px;
-    -fx-alignment: CENTER;
-    -fx-cursor: hand;
-}
-
-.boton-ayuda:hover {
-    -fx-background-color: #F5A623;
-}
-
-.panel-ayuda {
-    -fx-background-color: #F1EFE8;
-    -fx-background-radius: 20;
-    -fx-border-color: #D8D2C5;
-    -fx-border-radius: 20;
-    -fx-border-width: 1;
-    -fx-padding: 18;
-    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.22), 18, 0.18, 0, 5);
-}
-
-.titulo-ayuda {
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2D1B69;
-}
-
-.numeros-ayuda {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 12;
-    -fx-padding: 8 14;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #5B8F2A;
-}
-
-.lista-ayuda {
-    -fx-padding: 4;
-}
-
-.scroll-ayuda {
-    -fx-background-color: transparent;
-    -fx-min-height: 230;
-    -fx-max-height: 390;
-}
-
-.scroll-ayuda > .viewport {
-    -fx-background-color: transparent;
-}
-
-.tarjeta-ayuda {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 14;
-    -fx-border-color: #E4E1D6;
-    -fx-border-radius: 14;
-    -fx-border-width: 1;
-    -fx-padding: 12;
-    -fx-alignment: CENTER_LEFT;
-}
-
-.objetivo-tarjeta-ayuda {
-    -fx-background-color: #97C459;
-    -fx-background-radius: 100;
-    -fx-min-width: 38px;
-    -fx-min-height: 38px;
-    -fx-max-width: 38px;
-    -fx-max-height: 38px;
-    -fx-alignment: CENTER;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-}
-
-.expresion-tarjeta-ayuda {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #3D374A;
-}
-
-.sin-soluciones-ayuda {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 14;
-    -fx-padding: 18;
-    -fx-font-size: 14px;
-    -fx-text-fill: #3D374A;
 }
 
 /* ---------- Objetivos 1..10 ---------- */
@@ -211,63 +109,9 @@
 
 /* ---------- Tiles de numeros y operadores ---------- */
 
-.tile-numero {
-    -fx-background-color: #85B7EB;
-    -fx-text-fill: #042C53;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 14;
-    -fx-min-width: 72px;
-    -fx-min-height: 72px;
-    -fx-cursor: hand;
-}
-
-.tile-numero:disabled {
-    -fx-background-color: #E4E1D6;
-    -fx-text-fill: #77746D;
-    -fx-border-color: #C9C5BA;
-    -fx-border-radius: 14;
-    -fx-opacity: 1;
-}
-
-.tile-numero:usado {
-    -fx-background-color: #E4E1D6;
-    -fx-text-fill: #77746D;
-}
-
 .ayuda-numeros {
     -fx-font-size: 12px;
     -fx-text-fill: #77746D;
-}
-
-.tile-operador {
-    -fx-background-color: #EF9F27;
-    -fx-text-fill: #412402;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 14;
-    -fx-min-width: 72px;
-    -fx-min-height: 72px;
-    -fx-cursor: hand;
-}
-
-.btn-accion {
-    -fx-background-color: #E4E1D6;
-    -fx-text-fill: #2C2C2A;
-    -fx-font-weight: bold;
-    -fx-background-radius: 16;
-    -fx-padding: 10 20 10 20;
-    -fx-cursor: hand;
-}
-
-.btn-comprobar {
-    -fx-background-color: #97C459;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 15px;
-    -fx-background-radius: 16;
-    -fx-padding: 10 24 10 24;
-    -fx-cursor: hand;
 }
 
 /* ---------- Panel de victoria ---------- */
@@ -292,4 +136,240 @@
     -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-text-fill: #173404;
+}
+
+/* ============================================================
+   BOTONES "FICHA" (mismo estilo que Menu, Ranking y Como jugar)
+   [0] borde inferior grueso, [1] cara del boton
+   ============================================================ */
+
+.btn-ficha {
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 16, 16;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 22 12 22;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.btn-ficha:pressed {
+    -fx-translate-y: 3;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+.btn-ficha:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+    -fx-border-insets: -2;
+}
+.btn-ficha:disabled { -fx-opacity: 0.45; }
+
+.btn-ficha-naranja { -fx-background-color: #C77F0A, #EF9F27; -fx-text-fill: #412402; }
+.btn-ficha-naranja:hover { -fx-background-color: #C77F0A, #F5AE42; }
+
+.btn-ficha-azul { -fx-background-color: #5E97CE, #85B7EB; -fx-text-fill: #042C53; }
+.btn-ficha-azul:hover { -fx-background-color: #5E97CE, #95C3F0; }
+
+.btn-ficha-verde { -fx-background-color: #6E9A33, #97C459; -fx-text-fill: #173404; }
+.btn-ficha-verde:hover { -fx-background-color: #6E9A33, #A6D068; }
+
+.btn-ficha-crema { -fx-background-color: #C9C3B4, #FFFFFF; -fx-text-fill: #2D1B69; }
+.btn-ficha-crema:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+
+/* Comprobar: un poco mas grande, es la accion principal */
+.btn-comprobar-grande {
+    -fx-font-size: 16px;
+    -fx-padding: 10 28 14 28;
+}
+
+/* Boton "?" de ayuda (circular) */
+.boton-ayuda {
+    -fx-background-color: #C77F0A, #EF9F27;
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 100, 100;
+    -fx-text-fill: #412402;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 4 0;
+    -fx-min-width: 54px;
+    -fx-min-height: 54px;
+    -fx-max-width: 54px;
+    -fx-max-height: 54px;
+    -fx-alignment: CENTER;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.boton-ayuda:hover { -fx-background-color: #C77F0A, #F5AE42; }
+.boton-ayuda:pressed { -fx-translate-y: 3; -fx-background-insets: 0, 0 0 1 0; }
+.boton-ayuda:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 100;
+    -fx-border-insets: -2;
+}
+
+/* ---------- Tiles de numeros y operadores (fichas) ---------- */
+
+.tile-numero,
+.tile-operador {
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-background-radius: 16, 16;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+    -fx-alignment: CENTER;
+    -fx-min-width: 72px;
+    -fx-min-height: 72px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.tile-numero:pressed,
+.tile-operador:pressed {
+    -fx-translate-y: 4;
+    -fx-background-insets: 0, 0 0 1 0;
+}
+.tile-numero:focused,
+.tile-operador:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+    -fx-border-insets: -2;
+}
+
+.tile-numero { -fx-background-color: #5E97CE, #85B7EB; -fx-text-fill: #042C53; }
+.tile-numero:hover { -fx-background-color: #5E97CE, #95C3F0; }
+
+.tile-operador { -fx-background-color: #C77F0A, #EF9F27; -fx-text-fill: #412402; }
+.tile-operador:hover { -fx-background-color: #C77F0A, #F5AE42; }
+
+/* Numero ya utilizado: ficha gris, sin relieve al pasar el cursor */
+.tile-numero:disabled,
+.tile-numero:usado {
+    -fx-background-color: #C9C5BA, #E4E1D6;
+    -fx-text-fill: #77746D;
+    -fx-opacity: 1;
+    -fx-cursor: default;
+}
+
+/* ============================================================
+   TABLA "SOLUCIONES PARA EL RETO"
+   ============================================================ */
+
+.panel-ayuda {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 26;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 26;
+    -fx-border-width: 2;
+    -fx-padding: 20 22 20 22;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.28), 24, 0.12, 0, 8);
+}
+
+.titulo-ayuda {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+/* Los 4 numeros del reto, en pastilla azul (el color de las fichas de numeros) */
+.numeros-ayuda {
+    -fx-background-color: #85B7EB;
+    -fx-background-radius: 100;
+    -fx-padding: 6 18 6 18;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #042C53;
+}
+
+.lista-ayuda {
+    -fx-background-color: transparent;
+    -fx-padding: 4 6 6 2;
+}
+
+.scroll-ayuda {
+    -fx-background-color: transparent;
+    -fx-min-height: 230;
+    -fx-max-height: 390;
+}
+
+.scroll-ayuda > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Barra de desplazamiento fina y redondeada */
+.scroll-ayuda .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+    -fx-padding: 0;
+}
+.scroll-ayuda .scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-ayuda .scroll-bar .thumb {
+    -fx-background-color: #C9C3B4;
+    -fx-background-radius: 10;
+}
+.scroll-ayuda .scroll-bar .thumb:hover {
+    -fx-background-color: #A9A79E;
+}
+.scroll-ayuda .scroll-bar .increment-button,
+.scroll-ayuda .scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+    -fx-background-color: transparent;
+}
+.scroll-ayuda .scroll-bar .increment-arrow,
+.scroll-ayuda .scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: " ";
+}
+
+/* Cada solucion: tarjeta blanca con la ficha del objetivo a la izquierda */
+.tarjeta-ayuda {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 14 10 10;
+    -fx-alignment: CENTER_LEFT;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.10), 6, 0.1, 0, 2);
+}
+.tarjeta-ayuda:hover {
+    -fx-border-color: #85B7EB;
+}
+
+.objetivo-tarjeta-ayuda {
+    -fx-background-color: #6E9A33, #97C459;
+    -fx-background-insets: 0, 0 0 3 0;
+    -fx-background-radius: 100, 100;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0 0 3 0;
+    -fx-alignment: CENTER;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #173404;
+}
+
+.expresion-tarjeta-ayuda {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D1B69;
+}
+
+.sin-soluciones-ayuda {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 16;
+    -fx-padding: 18;
+    -fx-font-size: 14px;
+    -fx-text-fill: #302B3D;
 }
