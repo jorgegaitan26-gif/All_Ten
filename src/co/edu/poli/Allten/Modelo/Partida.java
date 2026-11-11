@@ -237,9 +237,8 @@ public class Partida {
      */
     private String[] buscarSoluciones(boolean preferirNuevos) {
 
-        String[] soluciones = new String[11];
         if (numerosDisponibles == null || numerosDisponibles.size() != 4) {
-            return soluciones;
+            return new String[11];
         }
 
         List<String> operadores = new ArrayList<>(List.of(
@@ -247,117 +246,161 @@ public class Partida {
         if (!"FACIL".equals(nivelDificultad)) {
             operadores.add(Expresion.POTENCIA);
         }
-        int combinacionesRaiz = "DIFICIL".equals(nivelDificultad) ? 16 : 1;
-        int k = operadores.size();
+        BusquedaSoluciones busqueda = new BusquedaSoluciones(
+                operadores, "DIFICIL".equals(nivelDificultad) ? 16 : 1, preferirNuevos);
+        buscarOrdenes(busqueda, new int[4], new boolean[4], 0);
+        return busqueda.soluciones;
+    }
 
+    private boolean buscarOrdenes(BusquedaSoluciones busqueda, int[] orden,
+                                  boolean[] indicesUsados, int posicion) {
+        if (posicion == orden.length) {
+            return buscarSolucionesParaOrden(busqueda, orden);
+        }
+
+        for (int indice = 0; indice < numerosDisponibles.size(); indice++) {
+            if (indicesUsados[indice]) {
+                continue;
+            }
+            orden[posicion] = indice;
+            indicesUsados[indice] = true;
+            boolean detener = buscarOrdenes(busqueda, orden, indicesUsados, posicion + 1);
+            indicesUsados[indice] = false;
+            if (detener) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean buscarSolucionesParaOrden(BusquedaSoluciones busqueda, int[] orden) {
         // Las 5 formas de agrupar 4 numeros, en notacion posfija (N = numero, O = operador).
         String[] formas = {"NNONONO", "NNONNOO", "NNNOONO", "NNNONOO", "NNNNOOO"};
+        int cantidadOperadores = busqueda.operadores.size();
 
-        boolean[] usaNuevos = new boolean[11];
-        int encontradas = 0;
-
-        busqueda:
-        for (int a = 0; a < 4; a++) {
-            for (int b = 0; b < 4; b++) {
-                for (int c = 0; c < 4; c++) {
-                    for (int d = 0; d < 4; d++) {
-                        if (a == b || a == c || a == d || b == c || b == d || c == d) {
-                            continue;
-                        }
-                        int[] orden = {a, b, c, d};
-
-                        for (int mascara = 0; mascara < combinacionesRaiz; mascara++) {
-                            for (int o = 0; o < k * k * k; o++) {
-                                String[] ops = {operadores.get(o % k), operadores.get(o / k % k),
-                                        operadores.get(o / (k * k))};
-
-                                for (String forma : formas) {
-
-                                    double[] valores = new double[4];
-                                    String[] textos = new String[4];
-                                    int tope = 0;
-                                    int siguienteNumero = 0;
-                                    int siguienteOperador = 0;
-                                    boolean valido = true;
-
-                                    for (char simbolo : forma.toCharArray()) {
-                                        if (simbolo == 'N') {
-                                            int indice = orden[siguienteNumero++];
-                                            int numero = numerosDisponibles.get(indice);
-                                            if ((mascara & (1 << indice)) != 0) {
-                                                valores[tope] = Math.sqrt(numero);
-                                                textos[tope] = Expresion.RAIZ + " " + numero;
-                                            } else {
-                                                valores[tope] = numero;
-                                                textos[tope] = String.valueOf(numero);
-                                            }
-                                            tope++;
-                                        } else {
-                                            String op = ops[siguienteOperador++];
-                                            double y = valores[--tope];
-                                            String textoY = textos[tope];
-                                            double x = valores[--tope];
-                                            String textoX = textos[tope];
-                                            double r;
-
-                                            if (Expresion.SUMA.equals(op)) {
-                                                r = x + y;
-                                            } else if (Expresion.RESTA.equals(op)) {
-                                                r = x - y;
-                                            } else if (Expresion.MULTIPLICACION.equals(op)) {
-                                                r = x * y;
-                                            } else if (Expresion.DIVISION.equals(op)) {
-                                                r = Math.abs(y) < 1e-9 ? Double.NaN : x / y;
-                                            } else {
-                                                double exponente = Math.rint(y);
-                                                r = (Math.abs(y - exponente) > 1e-9 || exponente < 0 || exponente > 5)
-                                                        ? Double.NaN
-                                                        : Math.pow(x, exponente);
-                                            }
-
-                                            if (Double.isNaN(r) || Double.isInfinite(r)) {
-                                                valido = false;
-                                                break;
-                                            }
-                                            valores[tope] = r;
-                                            textos[tope] = "( " + textoX + " " + op + " " + textoY + " )";
-                                            tope++;
-                                        }
-                                    }
-
-                                    if (!valido) {
-                                        continue;
-                                    }
-
-                                    double redondeado = Math.rint(valores[0]);
-                                    int objetivo = (int) redondeado;
-                                    if (Math.abs(valores[0] - redondeado) < 1e-9
-                                            && objetivo >= 1 && objetivo <= 10) {
-                                        // Se quitan los parentesis exteriores
-                                        String texto = textos[0].substring(2, textos[0].length() - 2);
-                                        boolean nuevos = texto.contains(Expresion.POTENCIA)
-                                                || texto.contains(Expresion.RAIZ);
-                                        if (soluciones[objetivo] == null) {
-                                            soluciones[objetivo] = texto;
-                                            usaNuevos[objetivo] = nuevos;
-                                            encontradas++;
-                                        } else if (preferirNuevos && nuevos && !usaNuevos[objetivo]) {
-                                            soluciones[objetivo] = texto;
-                                            usaNuevos[objetivo] = true;
-                                        }
-                                        if (!preferirNuevos && encontradas == 10) {
-                                            break busqueda;
-                                        }
-                                    }
-                                }
-                            }
+        for (int mascaraRaices = 0; mascaraRaices < busqueda.combinacionesRaiz; mascaraRaices++) {
+            for (int combinacion = 0; combinacion < cantidadOperadores * cantidadOperadores
+                    * cantidadOperadores; combinacion++) {
+                String[] operadores = {
+                    busqueda.operadores.get(combinacion % cantidadOperadores),
+                    busqueda.operadores.get(combinacion / cantidadOperadores % cantidadOperadores),
+                    busqueda.operadores.get(combinacion / (cantidadOperadores * cantidadOperadores))
+                };
+                for (String forma : formas) {
+                    Evaluacion evaluacion = evaluarForma(forma, orden, mascaraRaices, operadores);
+                    if (evaluacion != null) {
+                        registrarSolucion(busqueda, evaluacion);
+                        if (!busqueda.preferirNuevos && busqueda.encontradas == 10) {
+                            return true;
                         }
                     }
                 }
             }
         }
+        return false;
+    }
 
-        return soluciones;
+    private Evaluacion evaluarForma(String forma, int[] orden, int mascaraRaices, String[] operadores) {
+        double[] valores = new double[4];
+        String[] textos = new String[4];
+        int tope = 0;
+        int siguienteNumero = 0;
+        int siguienteOperador = 0;
+
+        for (char simbolo : forma.toCharArray()) {
+            if (simbolo == 'N') {
+                int indice = orden[siguienteNumero++];
+                int numero = numerosDisponibles.get(indice);
+                if ((mascaraRaices & (1 << indice)) != 0) {
+                    valores[tope] = Math.sqrt(numero);
+                    textos[tope] = Expresion.RAIZ + " " + numero;
+                } else {
+                    valores[tope] = numero;
+                    textos[tope] = String.valueOf(numero);
+                }
+                tope++;
+                continue;
+            }
+
+            String operador = operadores[siguienteOperador++];
+            double y = valores[--tope];
+            String textoY = textos[tope];
+            double x = valores[--tope];
+            String textoX = textos[tope];
+            double resultado = aplicarOperador(operador, x, y);
+            if (!Double.isFinite(resultado)) {
+                return null;
+            }
+            valores[tope] = resultado;
+            textos[tope] = "( " + textoX + " " + operador + " " + textoY + " )";
+            tope++;
+        }
+        return new Evaluacion(valores[0], textos[0]);
+    }
+
+    private double aplicarOperador(String operador, double x, double y) {
+        if (Expresion.SUMA.equals(operador)) {
+            return x + y;
+        }
+        if (Expresion.RESTA.equals(operador)) {
+            return x - y;
+        }
+        if (Expresion.MULTIPLICACION.equals(operador)) {
+            return x * y;
+        }
+        if (Expresion.DIVISION.equals(operador)) {
+            return Math.abs(y) < 1e-9 ? Double.NaN : x / y;
+        }
+
+        double exponente = Math.rint(y);
+        if (Math.abs(y - exponente) > 1e-9 || exponente < 0 || exponente > 5) {
+            return Double.NaN;
+        }
+        return Math.pow(x, exponente);
+    }
+
+    private void registrarSolucion(BusquedaSoluciones busqueda, Evaluacion evaluacion) {
+        double redondeado = Math.rint(evaluacion.valor);
+        int objetivo = (int) redondeado;
+        if (Math.abs(evaluacion.valor - redondeado) >= 1e-9 || objetivo < 1 || objetivo > 10) {
+            return;
+        }
+
+        String texto = evaluacion.texto.substring(2, evaluacion.texto.length() - 2);
+        boolean usaNuevos = texto.contains(Expresion.POTENCIA) || texto.contains(Expresion.RAIZ);
+        if (busqueda.soluciones[objetivo] == null) {
+            busqueda.soluciones[objetivo] = texto;
+            busqueda.usaNuevos[objetivo] = usaNuevos;
+            busqueda.encontradas++;
+        } else if (busqueda.preferirNuevos && usaNuevos && !busqueda.usaNuevos[objetivo]) {
+            busqueda.soluciones[objetivo] = texto;
+            busqueda.usaNuevos[objetivo] = true;
+        }
+    }
+
+    private static final class BusquedaSoluciones {
+        private final String[] soluciones = new String[11];
+        private final boolean[] usaNuevos = new boolean[11];
+        private final List<String> operadores;
+        private final int combinacionesRaiz;
+        private final boolean preferirNuevos;
+        private int encontradas;
+
+        private BusquedaSoluciones(List<String> operadores, int combinacionesRaiz, boolean preferirNuevos) {
+            this.operadores = operadores;
+            this.combinacionesRaiz = combinacionesRaiz;
+            this.preferirNuevos = preferirNuevos;
+        }
+    }
+
+    private static final class Evaluacion {
+        private final double valor;
+        private final String texto;
+
+        private Evaluacion(double valor, String texto) {
+            this.valor = valor;
+            this.texto = texto;
+        }
     }
 
     /**
