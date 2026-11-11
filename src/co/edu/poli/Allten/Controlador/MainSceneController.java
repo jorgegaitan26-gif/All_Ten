@@ -369,6 +369,9 @@ public class MainSceneController {
             ventana.initOwner(btnRetoDiario.getScene().getWindow());
             ventana.initModality(Modality.WINDOW_MODAL);
             ventana.setScene(new Scene(root, 900, 680));
+            // En Linux una ventana modal puede abrirse diminuta; el minimo lo evita (igual que "Como jugar").
+            ventana.setMinWidth(860);
+            ventana.setMinHeight(640);
             ventana.showAndWait();
         } catch (IOException e) {
             Alert alerta = new Alert(Alert.AlertType.ERROR);

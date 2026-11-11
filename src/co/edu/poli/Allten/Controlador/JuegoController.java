@@ -22,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import co.edu.poli.Allten.App.Sonidos;
 import co.edu.poli.Allten.DAO.DAOPartida;
 import co.edu.poli.Allten.Modelo.Expresion;
 import co.edu.poli.Allten.Modelo.Jugador;
@@ -392,11 +393,13 @@ public class JuegoController {
             case OBJETIVO_LOGRADO:
                 marcarUltimoObjetivoLogrado();
                 mostrarRetroalimentacionObjetivo();
+                Sonidos.reproducirAcierto();
                 break;
 
             case PARTIDA_GANADA:
                 marcarUltimoObjetivoLogrado();
                 mostrarRetroalimentacionObjetivo();
+                Sonidos.reproducirVictoria();
                 guardarPartidaFinalizada();
                 mostrarPanelVictoria();
                 compartirResultado();
