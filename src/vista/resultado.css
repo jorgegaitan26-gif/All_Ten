@@ -1,115 +1,136 @@
-/* Solo la paleta de All Ten:
-   verde #97C459 | crema #F1EFE8 | azul #7EB6E8 | naranja #F5A623 | blanco #FFFFFF */
+/* Tarjeta de resultados de All Ten.
+   Misma paleta que juego.css / interfaz.css:
+   crema #F1EFE8 | morado #2D1B69 | azul #85B7EB | naranja #EF9F27 | verde #97C459
+   Sobre cada color de relleno va texto oscuro (contraste >= 6:1, WCAG AA). */
+
+/* Fuente: Poppins se carga en ResultadoController (src/vista/fonts).
+   Si no estuviera disponible, se usa la fuente del sistema. */
+.resultado-root,
+.tarjeta-resultado,
+.resultado-root .button,
+.resultado-root .label {
+    -fx-font-family: "Poppins", "Segoe UI", "System";
+}
 
 /* Fondo de la ventana */
 .resultado-root {
     -fx-background-color: #F1EFE8;
 }
 
-/* ============ TARJETA (crema) ============ */
+/* ============ TARJETA (lo que se exporta) ============ */
 
 .tarjeta-resultado {
     -fx-background-color: #F1EFE8;
-    -fx-background-radius: 32;
-    -fx-padding: 24 24 20 24;
+    -fx-background-radius: 24;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 24;
+    -fx-border-width: 2;
+    -fx-padding: 16;
 }
 
+/* Paneles blancos con borde: delimitan cada bloque de información */
+.panel-blanco {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-padding: 10 14 10 14;
+}
+
+/* Encabezado */
 .marca {
-    -fx-background-color: #F5A623;
-    -fx-background-radius: 20;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 15px;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 30px;
     -fx-font-weight: bold;
-    -fx-padding: 5 20 5 20;
 }
 
 .titulo-reto {
-    -fx-text-fill: #F5A623;
+    -fx-text-fill: #3B6D11;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Etiquetas pequeñas de cada panel */
+.etiqueta {
+    -fx-text-fill: #5F5E5A;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* Jugador */
+.jugador-nombre {
+    -fx-text-fill: #2D1B69;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
-/* Panel azul que destaca el tiempo */
-.panel-tiempo {
-    -fx-background-color: #7EB6E8;
-    -fx-background-radius: 22;
-    -fx-padding: 8 36 10 36;
-}
-
-.etiqueta-tiempo {
-    -fx-text-fill: #FFFFFF;
+.fecha {
+    -fx-text-fill: #5F5E5A;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
 }
 
+/* Tiempo */
 .tiempo-grande {
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 60px;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 46px;
     -fx-font-weight: bold;
 }
 
 .badge-velocidad {
     -fx-background-color: #97C459;
     -fx-background-radius: 20;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 14px;
+    -fx-text-fill: #173404;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-padding: 5 20 5 20;
+    -fx-padding: 3 18 3 18;
 }
 
-/* Los 10 números conseguidos (una sola fila) */
+/* Los 10 números conseguidos */
 .bola-numero {
     -fx-background-color: #97C459;
-    -fx-background-radius: 50;
-    -fx-min-width: 32px;
-    -fx-min-height: 32px;
-    -fx-pref-width: 32px;
-    -fx-pref-height: 32px;
-    -fx-max-width: 32px;
-    -fx-max-height: 32px;
+    -fx-background-radius: 100;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-width: 30px;
+    -fx-pref-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
     -fx-alignment: CENTER;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-}
-
-.jugador-nombre {
-    -fx-text-fill: #F5A623;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-}
-
-.fecha {
-    -fx-text-fill: #F5A623;
-    -fx-font-size: 12px;
-}
-
-.caja-operaciones {
-    -fx-background-color: #7EB6E8;
-    -fx-background-radius: 14;
-    -fx-padding: 8 14 10 14;
-}
-
-.etiqueta-operaciones {
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
-}
-
-.texto-operaciones {
-    -fx-text-fill: #FFFFFF;
-    -fx-font-family: "Consolas", "Monospaced";
+    -fx-text-fill: #173404;
     -fx-font-size: 13px;
-    -fx-text-alignment: CENTER;
+    -fx-font-weight: bold;
 }
 
-.pie-tarjeta {
-    -fx-background-color: #F5A623;
-    -fx-background-radius: 20;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 15px;
+/* Operaciones */
+.texto-operaciones {
+    -fx-text-fill: #2C2C2A;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-padding: 6 22 6 22;
+    -fx-text-alignment: LEFT;
+    -fx-line-spacing: 1;
+}
+
+/* Pie */
+.pie-tarjeta {
+    -fx-background-color: #EF9F27;
+    -fx-background-radius: 20;
+    -fx-text-fill: #412402;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 22 5 22;
+}
+
+/* Zona desplazable (solo aparece la barra si la pantalla es pequeña) */
+.scroll-tarjeta,
+.scroll-tarjeta > .viewport,
+.contenedor-tarjeta {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.scroll-tarjeta {
+    -fx-padding: 0;
 }
 
 /* ============ BOTONES (fuera de la tarjeta) ============ */
@@ -117,24 +138,38 @@
 .btn-primario,
 .btn-secundario,
 .btn-cerrar {
-    -fx-background-radius: 20;
+    -fx-background-radius: 16;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-padding: 8 20 8 20;
+    -fx-padding: 10 22 10 22;
     -fx-cursor: hand;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
 
-.btn-primario,
-.btn-secundario,
-.btn-cerrar {
+.btn-primario {
     -fx-background-color: #97C459;
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: #173404;
+}
+
+.btn-secundario {
+    -fx-background-color: #85B7EB;
+    -fx-text-fill: #042C53;
+}
+
+.btn-cerrar {
+    -fx-background-color: #E4E1D6;
+    -fx-text-fill: #2C2C2A;
+}
+
+.btn-primario:hover,
+.btn-secundario:hover,
+.btn-cerrar:hover {
+    -fx-opacity: 0.88;
 }
 
 .estado {
-    -fx-text-fill: #F5A623;
+    -fx-text-fill: #3B6D11;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
