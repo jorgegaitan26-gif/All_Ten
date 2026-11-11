@@ -37,8 +37,9 @@
 
                     <Label fx:id="lblTiempo" text="00:00" styleClass="etiqueta-tiempo"/>
 
-                    <Button fx:id="btnReiniciar" text="Reiniciar" styleClass="btn-secundario" onAction="#reiniciarPartida"/>
-                    <Button fx:id="btnMenu" text="Menu" styleClass="btn-secundario" onAction="#volverAlMenu"/>
+                    <Button fx:id="btnComoJugar" text="Cómo jugar" styleClass="btn-ficha, btn-ficha-crema" onAction="#abrirInstrucciones"/>
+                    <Button fx:id="btnReiniciar" text="Reiniciar" styleClass="btn-ficha, btn-ficha-azul" onAction="#reiniciarPartida"/>
+                    <Button fx:id="btnMenu" text="Menu" styleClass="btn-ficha, btn-ficha-naranja" onAction="#volverAlMenu"/>
 
                 </HBox>
 
@@ -80,9 +81,9 @@
                 </VBox>
 
                 <HBox spacing="14" alignment="CENTER">
-                    <Button fx:id="btnBorrar" text="&#9003; Borrar" styleClass="btn-accion" onAction="#borrarUltimo"/>
-                    <Button fx:id="btnLimpiar" text="Limpiar intento" styleClass="btn-accion" onAction="#limpiarIntento"/>
-                    <Button fx:id="btnComprobar" text="Comprobar" styleClass="btn-comprobar" onAction="#comprobarIntento"/>
+                    <Button fx:id="btnBorrar" text="&#9003; Borrar" styleClass="btn-ficha, btn-ficha-crema" onAction="#borrarUltimo"/>
+                    <Button fx:id="btnLimpiar" text="Limpiar intento" styleClass="btn-ficha, btn-ficha-crema" onAction="#limpiarIntento"/>
+                    <Button fx:id="btnComprobar" text="Comprobar" styleClass="btn-ficha, btn-ficha-verde, btn-comprobar-grande" onAction="#comprobarIntento"/>
                 </HBox>
 
             </VBox>
@@ -126,9 +127,9 @@
                    wrapText="true" style="-fx-text-alignment: center; -fx-text-fill: #77746d;"/>
 
             <HBox spacing="14" alignment="CENTER">
-                <Button fx:id="btnJugarOtraVez" text="Jugar otra vez" styleClass="btn-comprobar" onAction="#jugarOtraVez"/>
-                <Button text="Compartir resultado" styleClass="btn-secundario" onAction="#compartirResultado"/>
-                <Button fx:id="btnCerrarVictoria" text="Menu" styleClass="btn-secundario" onAction="#volverAlMenu"/>
+                <Button fx:id="btnJugarOtraVez" text="Jugar otra vez" styleClass="btn-ficha, btn-ficha-verde" onAction="#jugarOtraVez"/>
+                <Button text="Compartir resultado" styleClass="btn-ficha, btn-ficha-azul" onAction="#compartirResultado"/>
+                <Button fx:id="btnCerrarVictoria" text="Menu" styleClass="btn-ficha, btn-ficha-naranja" onAction="#volverAlMenu"/>
             </HBox>
 
         </VBox>

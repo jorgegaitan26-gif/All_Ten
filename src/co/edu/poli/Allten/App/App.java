@@ -4,7 +4,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import java.util.TimeZone;
 
 /**
  * Punto de entrada de la aplicacion All Ten.
@@ -14,6 +16,10 @@ import javafx.stage.Stage;
  * (ver {@code co.edu.poli.Allten.Controlador}).
  */
 public class App extends Application {
+        /** Todas las fechas y horas del juego se manejan en hora de Colombia, sin depender del computador. */
+    static {
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Bogota"));
+    }
 
     /** Constructor por defecto, requerido por {@link Application}; JavaFX lo invoca internamente. */
     public App() {
@@ -28,6 +34,10 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) throws Exception {
+
+        // Fuente Poppins para todas las pantallas (ver src/vista/fonts)
+        Font.loadFont(App.class.getResourceAsStream("/vista/fonts/Poppins-Regular.ttf"), 12);
+        Font.loadFont(App.class.getResourceAsStream("/vista/fonts/Poppins-Bold.ttf"), 12);
 
         // La aplicacion inicia en el menu principal
         Parent root = FXMLLoader.load(

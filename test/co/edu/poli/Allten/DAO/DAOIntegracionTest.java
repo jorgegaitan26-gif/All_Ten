@@ -155,7 +155,7 @@ class DAOIntegracionTest {
         guardarPartida(beto, 45, fechaReto, haceMinutos(10));
         guardarPartida(caro, 10, null, haceMinutos(5));         // partida libre: no cuenta
 
-        List<EntradaRanking> ranking = partidaDAO.readRankingDelReto(fechaReto, 10);
+        List<EntradaRanking> ranking = partidaDAO.readRankingDelReto(fechaReto, "FACIL", 10);
 
         assertEquals(2, ranking.size(), "un puesto por jugador y sin la partida libre");
         assertEquals(beto.getNickname(), ranking.get(0).getNickname());
@@ -175,7 +175,7 @@ class DAOIntegracionTest {
         guardarPartida(segundo, 50, fechaReto, haceMinutos(5));
         guardarPartida(primero, 50, fechaReto, haceMinutos(15));
 
-        List<EntradaRanking> ranking = partidaDAO.readRankingDelReto(fechaReto, 10);
+        List<EntradaRanking> ranking = partidaDAO.readRankingDelReto(fechaReto, "FACIL", 10);
 
         assertEquals(primero.getNickname(), ranking.get(0).getNickname());
         assertEquals(segundo.getNickname(), ranking.get(1).getNickname());
@@ -187,14 +187,14 @@ class DAOIntegracionTest {
         for (int i = 0; i < 3; i++) {
             guardarPartida(crearJugador("lim" + i), 30 + i, fechaReto, haceMinutos(10 - i));
         }
-        assertEquals(2, partidaDAO.readRankingDelReto(fechaReto, 2).size());
+        assertEquals(2, partidaDAO.readRankingDelReto(fechaReto, "FACIL", 2).size());
     }
 
     @Test
     @DisplayName("Ranking: limites invalidos o fecha nula se rechazan")
     void parametrosInvalidos() {
-        assertThrows(IllegalArgumentException.class, () -> partidaDAO.readRankingDelReto(fechaReto, 0));
-        assertThrows(IllegalArgumentException.class, () -> partidaDAO.readRankingDelReto(null, 10));
+        assertThrows(IllegalArgumentException.class, () -> partidaDAO.readRankingDelReto(fechaReto, "FACIL", 0));
+        assertThrows(IllegalArgumentException.class, () -> partidaDAO.readRankingDelReto(null, "FACIL", 10));
     }
 
     @Test

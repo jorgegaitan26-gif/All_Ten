@@ -20,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.Clipboard;
@@ -27,8 +28,10 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -55,6 +58,12 @@ public class ResultadoController {
     /** Cantidad de números que el jugador debe obtener (1 al 10). */
     private static final int TOTAL_NUMEROS = 10;
 
+    /** Carga la fuente Poppins (incluida en el proyecto) una sola vez. */
+    static {
+        Font.loadFont(ResultadoController.class.getResourceAsStream("/vista/fonts/Poppins-Regular.ttf"), 12);
+        Font.loadFont(ResultadoController.class.getResourceAsStream("/vista/fonts/Poppins-Bold.ttf"), 12);
+    }
+
     @FXML
     private VBox tarjeta;
 
@@ -78,6 +87,12 @@ public class ResultadoController {
 
     @FXML
     private Label lblOperaciones;
+
+    @FXML
+    private Label lblOperaciones2;
+
+    @FXML
+    private ScrollPane scrollTarjeta;
 
     @FXML
     private Button btnGuardar;
@@ -134,6 +149,11 @@ public class ResultadoController {
         ResultadoController controlador = loader.getController();
         controlador.setResultado(jugador, partida, expresiones);
 
+        // Que la ventana nunca sea más alta que la pantalla: si no cabe, la tarjeta se desplaza
+        // y los botones de abajo siguen visibles.
+        double altoDisponible = Screen.getPrimary().getVisualBounds().getHeight();
+        controlador.scrollTarjeta.setMaxHeight(altoDisponible - 190);
+
         Stage ventana = new Stage();
         ventana.setTitle("Resultado - All Ten");
         ventana.setScene(new Scene(root));
@@ -185,7 +205,7 @@ public class ResultadoController {
         int segundos = (int) Math.max(0, Math.round(partida.getTiempoTotal()));
 
         lblTiempo.setText(formatearTiempo(segundos));
-        lblCategoria.setText(categoria(segundos));
+        lblCategoria.setText("✓  " + categoria(segundos));
 
         String nickname = (jugador == null || jugador.getNickname() == null
                 || jugador.getNickname().isBlank())
@@ -196,12 +216,20 @@ public class ResultadoController {
         Date fecha = partida.getFechaFinalizacion() != null
                 ? partida.getFechaFinalizacion()
                 : new Date();
-        lblFecha.setText(new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-CO"))
-                .format(fecha));
+        String textoFecha = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-CO"))
+                .format(fecha);
+        lblFecha.setText("DIFICIL".equals(partida.getNivelDificultad())
+                ? textoFecha + " · Modo difícil" : textoFecha);
 
         boolean hayOperaciones = expresiones != null && !expresiones.isEmpty();
 
-        lblOperaciones.setText(hayOperaciones ? String.join("\n", expresiones) : "");
+        // Las operaciones se reparten en dos columnas para que la tarjeta sea más baja
+        List<String> lista = hayOperaciones ? expresiones : List.of();
+        int mitad = (lista.size() + 1) / 2;
+        lblOperaciones.setText(String.join("\n", lista.subList(0, mitad)));
+        lblOperaciones2.setText(String.join("\n", lista.subList(mitad, lista.size())));
+        lblOperaciones2.setVisible(lista.size() > mitad);
+        lblOperaciones2.setManaged(lista.size() > mitad);
         cajaOperaciones.setVisible(hayOperaciones);
         cajaOperaciones.setManaged(hayOperaciones);
     }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -34,6 +35,9 @@ import co.edu.poli.Allten.Modelo.Partida;
  */
 public class JuegoController {
 
+    private static final long UMBRAL_RITMO_RAPIDO_NANOS = 30_000_000_000L;
+    private static final long UMBRAL_RITMO_MUY_PAUSADO_NANOS = 60_000_000_000L;
+
     @FXML private HBox filaObjetivos;
     @FXML private HBox filaNumeros;
     @FXML private HBox filaOperadores;
@@ -48,6 +52,7 @@ public class JuegoController {
     @FXML private Label lblInfoVictoria;
     @FXML private Button btnJugarOtraVez;
     @FXML private Button btnReiniciar;
+    @FXML private Button btnComoJugar;
     @FXML private StackPane panelVictoria;
     @FXML private VBox panelAyuda;
     @FXML private FlowPane listaAyuda;
@@ -60,7 +65,10 @@ public class JuegoController {
     private DAOPartida partidaDAO;
     private boolean partidaGuardada;
     private boolean retoDiario;
+    /** Dificultad de todo el juego: "FACIL" o "DIFICIL" (se escoge antes de empezar). */
+    private String dificultad = "FACIL";
     private boolean ayudaCargada;
+    private long inicioIntervaloObjetivoNanos;
 
     /** Expresiones con las que se logro cada objetivo (ej. "7 = 3 + 4"), para la tarjeta de resultados. */
     private final List<String> expresionesLogradas = new ArrayList<>();
@@ -118,14 +126,17 @@ public class JuegoController {
      *
      * @param jugador    jugador identificado en el menu principal
      * @param retoDiario true para el reto diario, false para una partida libre
+     * @param dificultad "FACIL" (+ - × ÷) o "DIFICIL" (agrega potencia y raiz)
      */
-    public void iniciarPartida(Jugador jugador, boolean retoDiario) {
+    public void iniciarPartida(Jugador jugador, boolean retoDiario, String dificultad) {
 
         this.jugador = jugador;
         this.retoDiario = retoDiario;
+        this.dificultad = "DIFICIL".equals(dificultad) ? "DIFICIL" : "FACIL";
         crearPartidaNueva();
 
-        lblModoPartida.setText(retoDiario ? "Reto diario" : "Partida libre");
+        lblModoPartida.setText((retoDiario ? "Reto diario" : "Partida libre")
+                + " · " + ("DIFICIL".equals(this.dificultad) ? "Difícil" : "Fácil"));
         btnReiniciar.setText(retoDiario ? "Reiniciar reto" : "Nueva partida");
         btnJugarOtraVez.setText(retoDiario ? "Repetir reto diario" : "Nueva partida");
         lblTituloVictoria.setText(retoDiario ? "Completaste el reto diario!" : "Completaste la partida!");
@@ -146,11 +157,13 @@ public class JuegoController {
      */
     private void crearPartidaNueva() {
         partida = new Partida(jugador);
+        partida.setDificultad(dificultad);   // antes de generar los numeros: la dificultad define las soluciones
         if (retoDiario) {
             partida.setFechaReto(Partida.fechaActualDelReto());
         }
         partida.generarNumerosValidos();
         partida.getCronometro().iniciar();
+        inicioIntervaloObjetivoNanos = System.nanoTime();
         partidaGuardada = false;
         expresionesLogradas.clear();
         intentoActual = new Expresion(partida);
@@ -176,7 +189,10 @@ public class JuegoController {
         }
     }
 
-    /** Crea los botones "(", +, -, x, /, ")" y les asigna su accion sobre {@link #intentoActual}. */
+    /**
+     * Crea los botones "(", +, -, x, /, ")" y les asigna su accion sobre
+     * {@link #intentoActual}. En dificultad DIFICIL agrega ademas potencia (^) y raiz (√).
+     */
     private void construirFilaOperadores() {
 
         filaOperadores.getChildren().clear();
@@ -191,6 +207,18 @@ public class JuegoController {
             Button boton = crearBotonSimbolo(operador);
             boton.setOnAction(e -> onOperador(operador));
             filaOperadores.getChildren().add(boton);
+        }
+
+        if ("DIFICIL".equals(dificultad)) {
+            Button potencia = crearBotonSimbolo(Expresion.POTENCIA);
+            potencia.setOnAction(e -> onOperador(Expresion.POTENCIA));
+            potencia.setAccessibleText("Potencia");
+            filaOperadores.getChildren().add(potencia);
+
+            Button raiz = crearBotonSimbolo(Expresion.RAIZ);
+            raiz.setOnAction(e -> onRaiz());
+            raiz.setAccessibleText("Raíz cuadrada");
+            filaOperadores.getChildren().add(raiz);
         }
 
         Button parCierra = crearBotonSimbolo(")");
@@ -258,7 +286,7 @@ public class JuegoController {
     }
 
     /**
-     * Se llama cuando el jugador toca un tile de operador (+, -, x, /).
+     * Se llama cuando el jugador toca un tile de operador binario (+, -, ×, ÷ y, en DIFICIL, ^).
      *
      * @param operador simbolo del operador presionado
      */
@@ -269,6 +297,24 @@ public class JuegoController {
 
         if (!agregado) {
             mostrarMensaje("No puedes poner un operador ahí.");
+        } else {
+            mostrarMensaje("");
+        }
+
+        refrescarVista();
+    }
+
+    /**
+     * Se llama cuando el jugador toca el boton de raiz cuadrada. La raiz es un
+     * operador de prefijo (va antes del numero o del parentesis que afecta), por
+     * eso no se encierra la expresion actual como hacen los operadores binarios.
+     */
+    private void onRaiz() {
+
+        boolean agregado = intentoActual.agregarOperacion(Expresion.RAIZ);
+
+        if (!agregado) {
+            mostrarMensaje("La raíz va antes de un número o paréntesis, por ejemplo: √ 9 o 2 × √ 4.");
         } else {
             mostrarMensaje("");
         }
@@ -345,11 +391,12 @@ public class JuegoController {
 
             case OBJETIVO_LOGRADO:
                 marcarUltimoObjetivoLogrado();
-                mostrarMensaje("¡Bien! Objetivo logrado.");
+                mostrarRetroalimentacionObjetivo();
                 break;
 
             case PARTIDA_GANADA:
                 marcarUltimoObjetivoLogrado();
+                mostrarRetroalimentacionObjetivo();
                 guardarPartidaFinalizada();
                 mostrarPanelVictoria();
                 compartirResultado();
@@ -498,7 +545,40 @@ public class JuegoController {
      * @param mensaje texto a mostrar al jugador
      */
     private void mostrarMensaje(String mensaje) {
+        lblMensaje.getStyleClass().removeAll(
+                "mensaje-ritmo-rapido", "mensaje-ritmo-pausado", "mensaje-ritmo-muy-pausado");
         lblMensaje.setText(mensaje);
+    }
+
+    private void mostrarRetroalimentacionObjetivo() {
+        long ahora = System.nanoTime();
+        long tiempoObjetivoNanos = ahora - inicioIntervaloObjetivoNanos;
+        double segundos = tiempoObjetivoNanos / 1_000_000_000.0;
+        inicioIntervaloObjetivoNanos = ahora;
+
+        String objetivo = partida.getOperacionesRealizadas()
+                .get(partida.getOperacionesRealizadas().size() - 1);
+        String tiempo = formatearDuracion(segundos);
+
+        if (tiempoObjetivoNanos <= UMBRAL_RITMO_RAPIDO_NANOS) {
+            mostrarMensajeConRitmo(
+                    "¡Vas muy bien! Objetivo " + objetivo + " en " + tiempo + ".",
+                    "mensaje-ritmo-rapido");
+        } else if (tiempoObjetivoNanos <= UMBRAL_RITMO_MUY_PAUSADO_NANOS) {
+            mostrarMensajeConRitmo(
+                    "¡Buen trabajo! Objetivo " + objetivo + " completado en " + tiempo
+                            + ". Sigue a tu ritmo.",
+                    "mensaje-ritmo-pausado");
+        } else {
+            mostrarMensajeConRitmo(
+                    "¡Vamos, tú puedes! Objetivo " + objetivo + " completado. Intenta un poco más rápido en el próximo.",
+                    "mensaje-ritmo-muy-pausado");
+        }
+    }
+
+    private void mostrarMensajeConRitmo(String mensaje, String estiloRitmo) {
+        mostrarMensaje(mensaje);
+        lblMensaje.getStyleClass().add(estiloRitmo);
     }
 
     @FXML
@@ -568,6 +648,7 @@ public class JuegoController {
 
     private void mostrarErrorPersistencia(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
+        co.edu.poli.Allten.App.Estilos.aplicarFuente(alerta);
         alerta.setTitle("Error al guardar la partida");
         alerta.setHeaderText("La partida terminó, pero no quedó registrada.");
         alerta.setContentText(mensaje);
@@ -670,6 +751,34 @@ public class JuegoController {
     @FXML
     private void reiniciarPartida() {
         jugarOtraVez();
+    }
+
+    /**
+     * Boton "Como jugar" (disponible en reto diario y partida libre): abre las
+     * instrucciones en una ventana modal. Mientras estan abiertas el cronometro
+     * se pausa, para que leerlas no cuente contra el tiempo del jugador.
+     */
+    @FXML
+    private void abrirInstrucciones() {
+        boolean relojCorriendo = reloj != null && reloj.getStatus() == Animation.Status.RUNNING;
+        long inicioPausa = System.nanoTime();
+        if (relojCorriendo) {
+            reloj.pause();
+        }
+
+        InstruccionesController.mostrar(filaNumeros.getScene().getWindow(), () -> {
+            if (!relojCorriendo) {
+                return;
+            }
+            // Se descuenta del cronometro el tiempo que estuvieron abiertas las instrucciones.
+            long pausaNanos = System.nanoTime() - inicioPausa;
+            Long inicio = partida.getCronometro().getTiempo_Inicio();
+            if (inicio != null) {
+                partida.getCronometro().setTiempo_Inicio(inicio + pausaNanos);
+            }
+            inicioIntervaloObjetivoNanos += pausaNanos;
+            reloj.play();
+        });
     }
 
     /**

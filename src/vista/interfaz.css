@@ -1,56 +1,134 @@
+/* ============================================================
+   Ranking y dialogo de nickname 
+   crema #F1EFE8 | morado #2D1B69 | azul #85B7EB | naranja #EF9F27 | verde #97C459
+   ============================================================ */
+
+/* ===================== RANKING ===================== */
+
 .ranking-root {
-    -fx-background-color: #f1efe8;
+    -fx-background-color: #97C459;
+    -fx-background-image: url("images/fondo_cuadricula.png");
+    -fx-background-repeat: repeat;
+    -fx-font-family: "Poppins", "Segoe UI", "System";
+}
+
+.ranking-tarjeta {
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 32;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 32;
+    -fx-border-width: 2;
+    -fx-padding: 22 26 22 26;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.28), 26, 0.12, 0, 9);
 }
 
 .ranking-header {
-    -fx-padding: 0 0 22 0;
+    -fx-padding: 0;
+}
+
+.ranking-icono {
+    -fx-background-color: #EF9F27;
+    -fx-background-radius: 100;
+    -fx-text-fill: #412402;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-min-width: 52px;
+    -fx-min-height: 52px;
+    -fx-max-width: 52px;
+    -fx-max-height: 52px;
 }
 
 .ranking-title,
 .nickname-title {
     -fx-font-size: 30px;
     -fx-font-weight: bold;
-    -fx-text-fill: #2d1b69;
+    -fx-text-fill: #2D1B69;
 }
 
 .ranking-subtitle,
 .nickname-description {
-    -fx-font-size: 14px;
-    -fx-text-fill: #77746d;
+    -fx-font-size: 13px;
+    -fx-text-fill: #5F5E5A;
 }
 
+/* Boton Cerrar: ficha naranja con borde inferior */
 .ranking-close {
-    -fx-background-color: #f5a623;
-    -fx-background-radius: 12;
-    -fx-text-fill: white;
+    -fx-background-color: #C77F0A, #EF9F27;
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 16, 16;
+    -fx-text-fill: #412402;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-padding: 9 20;
+    -fx-padding: 8 24 12 24;
     -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.ranking-close:hover   { -fx-background-color: #C77F0A, #F5AE42; }
+.ranking-close:pressed { -fx-translate-y: 3; -fx-background-insets: 0, 0 0 1 0; }
+.ranking-close:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+    -fx-border-insets: -2;
 }
 
+/* Contenedor blanco de filtros + tabla */
 .ranking-content {
-    -fx-background-color: white;
-    -fx-background-radius: 18;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24;
+    -fx-border-color: #E4E1D6;
+    -fx-border-radius: 24;
+    -fx-border-width: 1.5;
     -fx-padding: 18;
 }
 
+.ranking-etiqueta {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5F5E5A;
+}
+
+/* Filtros Facil / Dificil */
+.ranking-filtro {
+    -fx-background-color: #C9C3B4, #F1EFE8;
+    -fx-background-insets: 0, 0 0 4 0;
+    -fx-background-radius: 14, 14;
+    -fx-text-fill: #2D1B69;
+    -fx-font-weight: bold;
+    -fx-padding: 7 22 11 22;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.ranking-filtro:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+.ranking-filtro:selected {
+    -fx-background-color: #5E97CE, #85B7EB;
+    -fx-text-fill: #042C53;
+}
+
+/* ---------- Tabla ---------- */
 .ranking-table {
     -fx-background-color: transparent;
-    -fx-border-color: #e5e1d7;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-table-cell-border-color: #eeeae2;
+    -fx-border-color: #E5E1D7;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-table-cell-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
 }
 
 .ranking-table .column-header-background {
-    -fx-background-color: #2d1b69;
-    -fx-background-radius: 9 9 0 0;
+    -fx-background-color: #2D1B69;
+    -fx-background-radius: 13 13 0 0;
 }
 
 .ranking-table .column-header,
 .ranking-table .filler {
     -fx-background-color: transparent;
-    -fx-size: 42px;
+    -fx-size: 44px;
+    -fx-border-color: transparent;
 }
 
 .ranking-table .column-header .label {
@@ -59,58 +137,200 @@
     -fx-alignment: CENTER_LEFT;
 }
 
-.ranking-table .table-cell {
-    -fx-padding: 12 14;
-    -fx-font-size: 14px;
-    -fx-text-fill: #302b3d;
+.ranking-table .table-row-cell {
+    -fx-cell-size: 48px;
+    -fx-background-color: #FFFFFF;
 }
 
 .ranking-table .table-row-cell:odd {
-    -fx-background-color: #faf9f6;
+    -fx-background-color: #FAF9F6;
 }
 
+.ranking-table .table-row-cell:filled:hover,
 .ranking-table .table-row-cell:selected {
-    -fx-background-color: #e7eff9;
+    -fx-background-color: #E7EFF9;
 }
+
+.ranking-table .table-cell {
+    -fx-padding: 0 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 14px;
+    -fx-text-fill: #302B3D;
+}
+
+/* Insignia de posicion (el numero siempre se ve: el color no es la unica pista) */
+.pos-insignia {
+    -fx-background-radius: 100;
+    -fx-alignment: CENTER;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+}
+.pos-1 { -fx-background-color: #EF9F27; -fx-text-fill: #412402; }
+.pos-2 { -fx-background-color: #85B7EB; -fx-text-fill: #042C53; }
+.pos-3 { -fx-background-color: #97C459; -fx-text-fill: #173404; }
+.pos-otro { -fx-background-color: #E4E1D6; -fx-text-fill: #2C2C2A; }
 
 .ranking-empty,
 .ranking-footnote {
-    -fx-font-size: 13px;
-    -fx-text-fill: #77746d;
+    -fx-font-size: 12px;
+    -fx-text-fill: #5F5E5A;
 }
 
 .ranking-footnote {
-    -fx-padding: 3 2 0 2;
+    -fx-padding: 2 2 0 2;
 }
 
+/* ===================== DIALOGO DE NICKNAME ===================== */
+
+/* Marco verde cuadriculado; la tarjeta crema (.nickname-content) va dentro, completa */
 .nickname-dialog {
-    -fx-background-color: #f1efe8;
-    -fx-background-radius: 18;
-    -fx-padding: 12;
-    -fx-pref-width: 450;
+    -fx-font-family: "Poppins", "Segoe UI", "System";
+    -fx-background-color: #97C459;
+    -fx-background-image: url("images/fondo_cuadricula.png");
+    -fx-background-repeat: repeat;
+    -fx-padding: 18;
+    -fx-pref-width: 520;
+}
+
+.nickname-dialog .header-panel {
+    -fx-padding: 0;
+}
+
+/* La barra de botones propia del dialogo se oculta: los botones van dentro de la tarjeta */
+.nickname-dialog .button-bar {
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    visibility: hidden;
 }
 
 .nickname-content {
-    -fx-padding: 18 18 12 18;
+    -fx-background-color: #F1EFE8;
+    -fx-background-radius: 28;
+    -fx-border-color: #D8D2C5;
+    -fx-border-radius: 28;
+    -fx-border-width: 2;
+    -fx-padding: 24 26 22 26;
+    -fx-effect: dropshadow(gaussian, rgba(45, 27, 105, 0.28), 22, 0.12, 0, 7);
+}
+
+.nickname-header {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.nickname-badge {
+    -fx-background-color: #85B7EB;
+    -fx-background-radius: 100;
+    -fx-text-fill: #042C53;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+    -fx-min-width: 54px;
+    -fx-min-height: 54px;
+    -fx-max-width: 54px;
+    -fx-max-height: 54px;
 }
 
 .nickname-field {
-    -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-border-color: #d8d3c8;
-    -fx-border-radius: 10;
-    -fx-padding: 11;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-border-color: #C9C3B4;
+    -fx-border-radius: 14;
+    -fx-border-width: 2;
+    -fx-padding: 11 14;
     -fx-font-size: 15px;
+    -fx-text-fill: #2D1B69;
+}
+.nickname-field:focused {
+    -fx-border-color: #2D1B69;
 }
 
-.nickname-dialog .button {
-    -fx-background-radius: 10;
-    -fx-padding: 9 18;
+.dificultad-title {
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-cursor: hand;
+    -fx-text-fill: #5F5E5A;
+    -fx-padding: 6 0 0 0;
 }
 
-.nickname-dialog .button:default {
-    -fx-background-color: #97c459;
-    -fx-text-fill: white;
+/* Botones de dificultad */
+.dificultad-boton {
+    -fx-background-color: #C9C3B4, #FFFFFF;
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-background-radius: 16, 16;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-alignment: center;
+    -fx-alignment: CENTER;
+    -fx-padding: 8 12 13 12;
+    -fx-pref-height: 70px;
+    -fx-min-height: 70px;
+    -fx-max-height: 70px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.dificultad-boton:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+.dificultad-boton:selected {
+    -fx-background-color: #5E97CE, #85B7EB;
+    -fx-text-fill: #042C53;
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+}
+
+/* Fila Cancelar / Comenzar (dentro de la tarjeta crema) */
+.nickname-botones {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 8 0 0 0;
+}
+
+.nickname-boton {
+    -fx-background-color: #C9C3B4, #FFFFFF;
+    -fx-background-insets: 0, 0 0 5 0;
+    -fx-background-radius: 16, 16;
+    -fx-text-fill: #2D1B69;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 10 5 10;
+    -fx-min-width: 140px;
+    -fx-pref-width: 140px;
+    -fx-min-height: 48px;
+    -fx-pref-height: 48px;
+    -fx-max-height: 48px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.nickname-boton:hover { -fx-background-color: #C9C3B4, #FBFAF6; }
+.nickname-boton-primario {
+    -fx-background-color: #6E9A33, #97C459;
+    -fx-text-fill: #173404;
+}
+.nickname-boton-primario:hover { -fx-background-color: #6E9A33, #A6D068; }
+.nickname-boton:disabled {
+    -fx-opacity: 0.45;
+}
+.nickname-boton:pressed {
+    -fx-translate-y: 3;
+    -fx-background-insets: 0, 0 0 2 0;
+}
+.nickname-boton:focused {
+    -fx-border-color: #2D1B69;
+    -fx-border-width: 3;
+    -fx-border-radius: 16;
+    -fx-border-insets: -2;
+}
+
+/* ===================== FUENTE UNICA (Poppins) PARA ALERTAS Y DIALOGOS ===================== */
+.dialog-pane,
+.dialog-pane .label,
+.dialog-pane .button,
+.dialog-pane .text-field {
+    -fx-font-family: "Poppins", "Segoe UI", "System";
 }

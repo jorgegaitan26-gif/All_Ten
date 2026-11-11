@@ -16,20 +16,27 @@ import co.edu.poli.Allten.DAO.EntradaRanking;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 
 /**
  * Controlador de la ventana de ranking (RankingView.fxml).
  *
- * Permite filtrar el ranking (SCRUM-196):
+ * El ranking se separa por dificultad (botones Facil / Dificil) y se puede
+ * filtrar (SCRUM-196):
  * <ul>
- *   <li>por fecha del reto diario (selector de fecha);</li>
+ *   <li>por fecha del reto diario: sin fecha se muestra el ranking general
+ *       (mejor tiempo de cada jugador en todos los retos); con una fecha, solo
+ *       el reto de ese dia;</li>
  *   <li>por cantidad de puestos a mostrar (Top 10, 20 o 50);</li>
  *   <li>por jugador (busqueda por nickname); al buscar se muestra la posicion
  *       real del jugador en el ranking, aunque este fuera del Top elegido.</li>
@@ -48,6 +55,8 @@ public class RankingController {
 
     @FXML private Label lblRetoDiario;
     @FXML private Label lblSinResultados;
+    @FXML private ToggleButton btnRankingFacil;
+    @FXML private ToggleButton btnRankingDificil;
     @FXML private DatePicker selectorFecha;
     @FXML private ComboBox<Integer> selectorPuestos;
     @FXML private TextField campoBuscar;
@@ -57,13 +66,25 @@ public class RankingController {
     @FXML private TableColumn<EntradaRanking, String> columnaTiempo;
     @FXML private TableColumn<EntradaRanking, String> columnaFecha;
 
+    private final ToggleGroup grupoNivel = new ToggleGroup();
     private DAOPartida partidaDAO;
 
-    /** Ranking completo del reto elegido, traido de la base. */
+    /** Ranking completo consultado (nivel y fecha elegidos), sin filtrar. */
     private List<EntradaRanking> rankingCompleto = new ArrayList<>();
 
     @FXML
     private void initialize() {
+        btnRankingFacil.setToggleGroup(grupoNivel);
+        btnRankingDificil.setToggleGroup(grupoNivel);
+        btnRankingFacil.setSelected(true);
+        grupoNivel.selectedToggleProperty().addListener((obs, anterior, actual) -> {
+            if (actual == null && anterior != null) {
+                anterior.setSelected(true);   // siempre hay un nivel escogido
+            } else if (actual != null) {
+                recargar();
+            }
+        });
+
         columnaPosicion.setCellValueFactory(datos ->
                 new ReadOnlyIntegerWrapper(datos.getValue().getPosicion()));
         columnaJugador.setCellValueFactory(datos ->
@@ -74,6 +95,24 @@ public class RankingController {
                 new ReadOnlyStringWrapper(new SimpleDateFormat(FORMATO_FECHA)
                         .format(datos.getValue().getFechaFinalizacion())));
 
+        // Posicion dentro de una insignia redonda (1.º naranja, 2.º azul, 3.º verde); el numero siempre se ve.
+        columnaPosicion.setCellFactory(columna -> new TableCell<>() {
+            @Override
+            protected void updateItem(Number posicion, boolean vacia) {
+                super.updateItem(posicion, vacia);
+                if (vacia || posicion == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
+                int n = posicion.intValue();
+                Label insignia = new Label(String.valueOf(n));
+                insignia.getStyleClass().addAll("pos-insignia", n >= 1 && n <= 3 ? "pos-" + n : "pos-otro");
+                setGraphic(insignia);
+                setText(null);
+            }
+        });
+
         columnaPosicion.setSortable(false);
         columnaJugador.setSortable(false);
         columnaTiempo.setSortable(false);
@@ -81,9 +120,8 @@ public class RankingController {
 
         selectorPuestos.getItems().setAll(OPCIONES_PUESTOS);
         selectorPuestos.setValue(OPCIONES_PUESTOS.get(0));
-        selectorFecha.setValue(LocalDate.now(ZONA_RETO));
 
-        // Cambiar la fecha vuelve a consultar la base;
+        // Cambiar la fecha o el nivel vuelve a consultar la base;
         // cambiar los puestos o la busqueda solo filtra lo que ya se trajo.
         selectorFecha.valueProperty().addListener((obs, antes, ahora) -> recargar());
         selectorPuestos.valueProperty().addListener((obs, antes, ahora) -> aplicarFiltros());
@@ -91,31 +129,52 @@ public class RankingController {
     }
 
     /**
-     * Recibe el DAO y carga el ranking del reto de hoy. Lo llama
-     * {@link MainSceneController} justo despues de cargar el FXML.
+     * Recibe el DAO y carga el ranking general. Se abre en la dificultad
+     * indicada y se cambia con los botones Facil / Dificil.
      *
-     * @param partidaDAO DAO de partidas
+     * @param partidaDAO   DAO de partidas
+     * @param nivelInicial "FACIL" o "DIFICIL"
      */
-    public void setPartidaDAO(DAOPartida partidaDAO) {
+    public void configurar(DAOPartida partidaDAO, String nivelInicial) {
         this.partidaDAO = partidaDAO;
+        if ("DIFICIL".equals(nivelInicial)) {
+            btnRankingDificil.setSelected(true);
+        } else {
+            btnRankingFacil.setSelected(true);
+        }
         recargar();
     }
 
-    /** Consulta la base segun la fecha elegida y aplica los filtros. */
+    /** Quita la fecha elegida y vuelve al ranking general. */
+    @FXML
+    private void verTodosLosRetos() {
+        selectorFecha.setValue(null);   // dispara recargar()
+    }
+
+    /** Consulta la base segun el nivel y la fecha elegidos, y aplica los filtros. */
     private void recargar() {
         if (partidaDAO == null) {
             return;
         }
 
-        LocalDate fecha = selectorFecha.getValue() != null ? selectorFecha.getValue() : LocalDate.now(ZONA_RETO);
+        String nivel = btnRankingDificil.isSelected() ? "DIFICIL" : "FACIL";
+        LocalDate fecha = selectorFecha.getValue();
 
         try {
-            rankingCompleto = partidaDAO.readRankingDelReto(aFechaReto(fecha), MAXIMO_CONSULTA);
-            lblRetoDiario.setText("Reto del " + fecha.format(DateTimeFormatter.ofPattern(FORMATO_FECHA)));
-
+            if (fecha == null) {
+                rankingCompleto = partidaDAO.readRankingGeneral(nivel, MAXIMO_CONSULTA);
+                lblRetoDiario.setText("Mejores tiempos de todos los retos diarios");
+            } else {
+                rankingCompleto = partidaDAO.readRankingDelReto(aFechaReto(fecha), nivel, MAXIMO_CONSULTA);
+                lblRetoDiario.setText("Reto del " + fecha.format(DateTimeFormatter.ofPattern(FORMATO_FECHA)));
+            }
         } catch (Exception e) {
             rankingCompleto = new ArrayList<>();
-            lblRetoDiario.setText("No se pudo consultar el ranking: " + e.getMessage());
+            Alert alerta = new Alert(Alert.AlertType.ERROR);
+            alerta.setTitle("Error al consultar el ranking");
+            alerta.setHeaderText("No se pudo consultar el ranking.");
+            alerta.setContentText(e.getMessage());
+            alerta.showAndWait();
         }
 
         aplicarFiltros();
