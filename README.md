@@ -21,7 +21,7 @@ operaciones) que se puede guardar como PNG o copiar para compartirla. El botón 
 
 ## Requisitos
 
-- JDK 26
+- JDK 26 (el proyecto compila con `--release 26`; verificado con JDK 26.0.2)
 - Apache Maven 3.9 o superior (descarga JavaFX, el conector de MySQL y JUnit)
 - MySQL 8
 
@@ -64,7 +64,8 @@ mvn javafx:run -Djavafx.mainClass=co.edu.poli.Allten.App.DemoResultado
 
 ## Pruebas
 
-Las pruebas JUnit de los modelos están en `test/`:
+Las pruebas unitarias de los modelos y las pruebas de integración de los DAO
+(con una base H2 aislada en modo MySQL, sin usar la base de desarrollo) están en `test/`:
 
 ```bash
 mvn test
@@ -79,7 +80,7 @@ src/co/edu/poli/Allten/
 ├── DAO/           Acceso a MySQL: CRUD, ConexionBD, DAOJugador, DAOPartida, EntradaRanking
 └── Modelo/        Jugador, Partida, Expresion, Cronometro
 src/vista/         Pantallas FXML, estilos CSS e imágenes
-test/              Pruebas JUnit de los modelos
+test/              Pruebas unitarias e integración de modelos y DAO
 database/          Script de creación de tablas y migraciones
 docs/              Diagrama de clases, modelo relacional y diagramas de flujo
 ```

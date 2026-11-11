@@ -15,8 +15,18 @@ import co.edu.poli.Allten.Modelo.Jugador;
  */
 public class DAOJugador implements CRUD<Jugador> {
 
+    private final ConnectionProvider connectionProvider;
+
     /** Longitud máxima de nickname según la base de datos, VARCHAR(45). */
     private static final int MAX_NICKNAME = 45;
+
+    public DAOJugador() {
+        this(() -> ConexionBD.getInstancia().getConexion());
+    }
+
+    DAOJugador(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
 
     /**
      * Registra un jugador nuevo. Al terminar, el objeto recibido queda con el
@@ -39,7 +49,7 @@ public class DAOJugador implements CRUD<Jugador> {
             throw new IllegalArgumentException("Ya existe un jugador con el nickname \"" + nickname + "\".");
         }
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "INSERT INTO Jugador (nickname) VALUES (?)";
 
@@ -69,7 +79,7 @@ public class DAOJugador implements CRUD<Jugador> {
     @Override
     public <K> Jugador readone(K id) throws Exception {
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT id_Jugador, nickname FROM Jugador WHERE id_Jugador = ?";
 
@@ -100,7 +110,7 @@ public class DAOJugador implements CRUD<Jugador> {
             return null;
         }
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT id_Jugador, nickname FROM Jugador WHERE nickname = ?";
 
@@ -129,7 +139,7 @@ public class DAOJugador implements CRUD<Jugador> {
 
         List<Jugador> lista = new ArrayList<>();
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "SELECT id_Jugador, nickname FROM Jugador ORDER BY id_Jugador";
 
@@ -164,7 +174,7 @@ public class DAOJugador implements CRUD<Jugador> {
             throw new IllegalArgumentException("Ya existe otro jugador con el nickname \"" + nickname + "\".");
         }
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "UPDATE Jugador SET nickname = ? WHERE id_Jugador = ?";
 
@@ -198,7 +208,7 @@ public class DAOJugador implements CRUD<Jugador> {
 
         int idJugador = aEntero(id);
 
-        Connection con = ConexionBD.getInstancia().getConexion();
+        Connection con = connectionProvider.getConnection();
 
         String sql = "DELETE FROM Jugador WHERE id_Jugador = ?";
 
